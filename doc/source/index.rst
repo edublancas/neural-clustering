@@ -46,6 +46,14 @@ Welcome to neural-noise's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   filter
+   spike_detection
+   spike_removal
+   noise_imputation
+   noise_discretization
+   feature_extraction
+   clustering
+
 
 
 Indices and tables

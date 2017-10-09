@@ -1,0 +1,4 @@
+Spike detection
+===============
+
+* Threshold detection
