@@ -5,3 +5,6 @@ jupyter
 matplotlib
 # yass
 # tensorflow
+
+# doc
+sphinx
