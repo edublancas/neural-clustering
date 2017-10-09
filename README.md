@@ -2,9 +2,11 @@
 
 Neural noise project
 
-## Install optimized tensorflow
+## Other requirements
 
-https://github.com/lakshayg/tensorflow-build
+
+tensorflow: https://github.com/lakshayg/tensorflow-build
+graphviz
 
 ## Project repository template
 

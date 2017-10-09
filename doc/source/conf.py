@@ -34,7 +34,13 @@
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.intersphinx',
               'sphinx.ext.mathjax',
-              'sphinx.ext.graphviz']
+              'sphinx.ext.graphviz',
+              'sphinxcontrib.blockdiag']
+
+# available options: http://blockdiag.com/en/blockdiag/sphinxcontrib.html
+blockdiag_fontpath = '/System/Library/Fonts/Helvetica.ttc'
+blockdiag_html_image_format = "SVG"
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

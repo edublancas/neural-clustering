@@ -8,3 +8,4 @@ matplotlib
 
 # doc
 sphinx
+sphinxcontrib-blockdiag
