@@ -19,8 +19,9 @@ def config(path_to_config):
     return config
 
 
-def data(path_to_data, n_observations, n_channels):
+def data(config, n_observations, n_channels):
     """Load MEAs readings
     """
+    path_to_data = os.path.join(config['data_root'], config['data_filename'])
     data = np.fromfile(path_to_data, dtype='int16')
     return data.reshape(n_observations, n_channels)

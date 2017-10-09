@@ -1,3 +1,5 @@
 edward
 pyyaml
 jupyter
+matplotlib
+# yass
