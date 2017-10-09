@@ -1,5 +1,7 @@
+scipy
 edward
 pyyaml
 jupyter
 matplotlib
 # yass
+# tensorflow
