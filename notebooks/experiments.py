@@ -1,5 +1,7 @@
+import os.path
 import logging
 
+import numpy as np
 import matplotlib.pyplot as plt
 
 import yass
@@ -11,6 +13,12 @@ logging.basicConfig(level=logging.INFO)
 
 # set yass configuration parameters
 yass.set_config('config.yaml')
+
+cfg = yass.read_config()
+
+
+raw = np.fromfile(os.path.join(cfg.root, cfg.filename), dtype='int16')
+raw = raw.reshape(100000, cfg.nChan)
 
 # run preprocessor
 score, clr_idx, spt = preprocess.run()
