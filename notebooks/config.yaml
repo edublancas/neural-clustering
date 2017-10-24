@@ -43,7 +43,7 @@ whitenBatchwise: 0
 # number of features for dimension reduction
 nFeat: 3
 # temporal length of wavforms in ms
-spikeSizeMS: 4
+spikeSizeMS: 1.5
 
 # NN DETECTION
 # Threshold for spike event detection
@@ -92,9 +92,9 @@ deconvLam: 20
 neural_network:
   # NN filenames
   # tf nn trained model file name
-  nnFilename: ej_new.ckpt
-  aeFilename: ae.ckpt
-  nnTriageFilename: triagenet1.ckpt
+  nnFilename: detectnet1.ckpt
+  aeFilename: ae_31.ckpt
+  nnTriageFilename: triagenet3.ckpt
 
   # NN architecture
   # num. of filters in each layer
