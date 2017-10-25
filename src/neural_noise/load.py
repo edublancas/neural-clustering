@@ -1,27 +1,32 @@
-import os.path
-
-import yaml
 import numpy as np
 
 
-def config(path_to_config):
-    """Load yaml config file
-    """
-    def _expand(k, v):
-        return os.path.expanduser(v) if k.endswith('root') else v
-
-    with open(path_to_config) as f:
-        config = yaml.load(f)
-
-    # expand paths with ~
-    config = {k: _expand(k, v) for k, v in config.items()}
-
-    return config
-
-
-def data(config, n_observations, n_channels):
+def data(path, n_channels, data_format='long', dtype='int16'):
     """Load MEAs readings
+
+    Parameters
+    ----------
+    path: str
+        Path to data file
+    n_channels: int
+        Number of channels
+    data_format: str
+        'long' [observations per channel, number of channels] or 'wide'
+        [number of channels, observations per channel]
+    dtype: str
+        Numpy dtype
+
+    Returns
+    -------
+    data: data in long format
     """
-    path_to_data = os.path.join(config['data_root'], config['data_filename'])
-    data = np.fromfile(path_to_data, dtype='int16')
-    return data.reshape(n_observations, n_channels)
+    data = np.fromfile(path, dtype=dtype)
+    n_obs = len(data)
+    obs_per_channel = int(n_obs/n_channels)
+
+    dims = ((obs_per_channel, n_channels) if data_format == 'long'
+            else (n_channels, obs_per_channel))
+
+    data_reshaped = data.reshape(dims)
+
+    return data_reshaped if data_reshaped == 'long' else data_reshaped.T
