@@ -33,18 +33,6 @@ time, channel = spike_times[0][10, :]
 time, channel
 
 
-def plot_multi_channel_window(time, channels, dt):
-    f, axs = plt.subplots(len(channels), 1)
-
-    for ax, ch in zip(axs, channels):
-        plot_spike_window(time, ch, dt, ax=ax)
-
-
-def plot_spike_window(time, channel, dt, ax=None):
-    ax = ax if ax else plt
-    spike = raw[time-dt-1:time+dt+1, channel]
-    ax.plot(spike)
-    ax.axvline(x=dt + 1)
 
 
 

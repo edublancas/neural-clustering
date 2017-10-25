@@ -4,9 +4,9 @@
 # data root folder
 root: /Users/Edu/data/yass
 # binary recording filename
-filename: sample_100k.bin
+filename: ej49_data1_set1.bin
 # channel geometry file name
-geomFile: geometry.txt
+geomFile: ej49_geometry1.txt
 # save spikeTrain
 spikeTrainName: ej49_spikeTrain.csv
 
@@ -43,7 +43,7 @@ whitenBatchwise: 0
 # number of features for dimension reduction
 nFeat: 3
 # temporal length of wavforms in ms
-spikeSizeMS: 4
+spikeSizeMS: 1.5
 
 # NN DETECTION
 # Threshold for spike event detection
@@ -92,8 +92,8 @@ deconvLam: 20
 neural_network:
   # NN filenames
   # tf nn trained model file name
-  nnFilename: ej_new.ckpt
-  aeFilename: ae.ckpt
+  nnFilename: detectnet1.ckpt
+  aeFilename: ae_31.ckpt
   nnTriageFilename: triagenet1.ckpt
 
   # NN architecture
