@@ -9,7 +9,7 @@ from yass import preprocess
 from yass import process
 
 # configure logging module to get useful information
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 # set yass configuration parameters
 yass.set_config('config.yaml')
@@ -33,7 +33,6 @@ time, channel = spike_times[0][10, :]
 time, channel
 
 
-
 def plot_multi_channel_window(time, channels, dt):
     f, axs = plt.subplots(len(channels), 1)
 
@@ -53,5 +52,5 @@ plot_spike_window(time, channel, dt=70)
 plt.show()
 
 
-plot_multi_channel_window(time, range(6), dt=70)
+plot_multi_channel_window(1000, range(6), dt=700)
 plt.show()
