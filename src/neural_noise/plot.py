@@ -16,6 +16,6 @@ def series(data, channel=None, time=None, dt=None, ax=None):
     spike = (data[:, channel] if not time
              else data[time-dt-1:time+dt+1, channel])
     ax.plot(spike)
-    
+
     if dt:
         ax.axvline(x=dt + 1)
