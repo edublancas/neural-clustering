@@ -95,5 +95,7 @@ setup(
     ],
     install_requires=REQUIRED,
     entry_points={
+        'console_scripts': ['get-waveforms=neural_noise.command_line'
+                            ':extract_waveforms'],
     },
 )
