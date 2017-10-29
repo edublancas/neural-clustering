@@ -24,6 +24,9 @@ get-waveforms config_sample.yaml
 
 # extract noise
 get-noise config_sample.yaml
+
+# fit noise model using edward
+fit-noise config_sample.yaml
 ```
 
 
