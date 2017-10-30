@@ -1,16 +1,21 @@
 import numpy as np
 import matplotlib as plt
 
+from neural_noise import plot
+
 # load noise data
-noise = np.load('/ssd/data/eduardo/noise.npy')
+noise = np.load('/users/edu/data/noise/noise.npy')
 noise.shape
 N, _, _ = noise.shape
 
 # sample
-percentage = 0.01
+percentage = 0.3
 idx = np.random.choice(N, int(percentage*N), replace=False)
 sample = noise[idx, :, :]
 sample.shape
 
-for s in sample[:10,:,:]:
-    print(s.shape)
+plot.waveform(sample[:, :, 0])
+plt.show()
+
+plot.waveforms(sample)
+plt.show()

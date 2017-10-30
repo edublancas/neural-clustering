@@ -27,12 +27,14 @@ def series(data, channel=None, time=None, dt=None, ax=None):
         ax.axvline(x=dt + 1)
 
 
-def waveform(data):
+def waveform(data, ax=None):
     """Single channel scatterplot
     """
+    ax = ax if ax else plt
     x = data[:, 0]
     y = data[:, 1]
-    plt.scatterplot(x, y)
+
+    ax.scatter(x, y)
 
 
 def waveforms(data):
@@ -40,10 +42,12 @@ def waveforms(data):
     """
     n_samples, n_features, n_channels = data.shape
 
-    rows = int(np.ceil(np.sqrt(n_channels)))
-    cols = n_channels - rows
+    rows = 4
+    cols = 2
 
     f, axs = plt.subplots(rows, cols)
+    # flatten axs
+    axs = [item for sublist in axs for item in sublist]
 
-    for ax, ch in zip(axs, n_channels):
-        data(data[:, :, ch], ax=ax)
+    for ax, ch in zip(axs, range(n_channels)):
+        waveform(data[:, :, ch], ax=ax)
