@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 from neural_noise import plot
 
@@ -14,8 +14,8 @@ idx = np.random.choice(N, int(percentage*N), replace=False)
 sample = noise[idx, :, :]
 sample.shape
 
-plot.waveform(sample[:, :, 0])
+plot.waveform(sample[0, :, 0])
 plt.show()
 
-plot.waveforms(sample)
+plot.waveforms(sample, channels=range(7))
 plt.show()

@@ -2,7 +2,6 @@
 Plotting functions
 """
 import matplotlib.pyplot as plt
-import numpy as np
 
 
 def geometry(geom):
@@ -10,14 +9,14 @@ def geometry(geom):
     plt.scatter(x, y)
 
 
-def multi_channel_series(data, channels, time=None, dt=None):
+def waveforms(data, channels, time=None, dt=None):
     f, axs = plt.subplots(len(channels), 1)
 
     for ax, ch in zip(axs, channels):
-        series(data, ch, time, dt, ax=ax)
+        waveform(data, ch, time, dt, ax=ax)
 
 
-def series(data, channel=None, time=None, dt=None, ax=None):
+def waveform(data, channel=None, time=None, dt=None, ax=None):
     ax = ax if ax else plt
     spike = (data[:, channel] if not time
              else data[time-dt-1:time+dt+1, channel])
@@ -27,8 +26,8 @@ def series(data, channel=None, time=None, dt=None, ax=None):
         ax.axvline(x=dt + 1)
 
 
-def waveform(data, ax=None):
-    """Single channel scatterplot
+def score(data, ax=None):
+    """Single channel score plot
     """
     ax = ax if ax else plt
     x = data[:, 0]
@@ -37,8 +36,8 @@ def waveform(data, ax=None):
     ax.scatter(x, y)
 
 
-def waveforms(data):
-    """Multi channel scatterplot
+def scores(data):
+    """Multi channel score plot
     """
     n_samples, n_features, n_channels = data.shape
 
@@ -50,4 +49,4 @@ def waveforms(data):
     axs = [item for sublist in axs for item in sublist]
 
     for ax, ch in zip(axs, range(n_channels)):
-        waveform(data[:, :, ch], ax=ax)
+        score(data[:, :, ch], ax=ax)
