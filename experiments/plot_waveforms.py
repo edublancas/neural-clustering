@@ -9,7 +9,7 @@ noise.shape
 N, _, _ = noise.shape
 
 # sample
-percentage = 0.3
+percentage = 0.01
 idx = np.random.choice(N, int(percentage*N), replace=False)
 sample = noise[idx, :, :]
 sample.shape
