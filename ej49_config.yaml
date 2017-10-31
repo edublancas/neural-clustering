@@ -1,8 +1,8 @@
-# SAMPLE CONFIGURATION FILE
+ # SAMPLE CONFIGURATION FILE
 
 # DATA FILES
 # data root folder
-root: /ssd/data/peter/ej49_dataset
+root: /ssd/data/eduardo
 # binary recording filename
 filename: ej49_data1_set1.bin
 # channel geometry file name
