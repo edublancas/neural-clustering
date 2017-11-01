@@ -44,7 +44,8 @@ def extract_waveforms():
                                         in clear_index[channel])
 
         df['score_idx'] = np.nan
-        df.loc[df.clear, 'score_idx'] = np.arange(len(df[df.clear]))
+        df.loc[df.clear, 'score_idx'] = (np.arange(len(df[df.clear]))
+                                         .astype('int'))
         df['score'] = df.apply(get_score, axis=1)
         return df
 
@@ -57,6 +58,11 @@ def extract_waveforms():
 
     if not os.path.exists(path_to_pickle):
         os.makedirs(path_to_pickle)
+
+    # we only care about clear spikes
+    clear_spikes = df[df.clear][['time', 'channel']]
+
+    scores = np.vstack([s for s in score])
 
     df.to_pickle(path_to_pickle_file)
 
