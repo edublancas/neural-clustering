@@ -14,13 +14,13 @@ from edward.models import (Dirichlet, InverseGamma, MultivariateNormalDiag,
 ##############
 
 # number of data points
-N = 100000
+N = 500
 # number of components
 K = 8
 # dimensionality of data
 D = 2
 # number of MCMC samples
-T = 1000000
+T = 10000
 
 
 ##########
