@@ -1,18 +1,71 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from yass import geometry
 
-class Explorer(object):
 
-    def __init__(self, path_to_readings, dtype, window_size,
-                 n_channels):
+class SpikeTrainExplorer(object):
+    """
+        templates
+        spike_train
+    """
+    def __init__(self, templates, spike_train, recording_explorer=None):
+        self.spike_train = spike_train
+        self.templates = templates
+        self.recording_explorer = recording_explorer
+
+    def times_for_group(self, group_id):
+        """
+        """
+        matches_group = self.spike_train[:, 1] == group_id
+        return self.spike_train[:, matches_group]
+
+    def main_channel_for_group(self, group_id):
+        """
+        """
+        template = self.templates[:, :, group_id]
+        main = np.argmax(np.max(template, axis=1))
+        return main
+
+    def neighbor_channels_for_group(self, group_id):
+        main = self.main_channel_for_group(group_id)
+        neigh_matrix = self.recording_explorer.neigh_matrix
+        return np.where(neigh_matrix[main])[0]
+
+    def template_for_group(self, group_id):
+        return self.templates[:, :, group_id]
+
+    def template_components(self, group_id, channels):
+        # get all spike times that form this group
+        times = self.times_for_group(group_id)
+
+        # find main channel
+        main = self.main_channel_for_group(group_id)
+
+        # get waveforms around the group
+        around = self.recording_explorer.read_waveform_around_channel
+        return [around(t, main) for t in times]
+
+
+class RecordingExplorer(object):
+
+    def __init__(self, path_to_readings, path_to_geom, dtype, window_size,
+                 n_channels, neighbor_radius):
         self.data = np.fromfile(path_to_readings, dtype)
+        self.geom = geometry.parse(path_to_geom, n_channels)
+        self.neigh_matrix = geometry.find_channel_neighbors(self.geom,
+                                                            neighbor_radius)
+
+        # TODO: infer from geom?
         self.n_channels = n_channels
 
         obs = int(self.data.shape[0]/n_channels)
         self.data = self.data.reshape(obs, n_channels)
 
         self.window_size = window_size
+
+    def neighbors_for_channel(self, channel):
+        return np.where(self.neigh_matrix[channel])[0]
 
     def read_waveform(self, time, channels='all'):
         """Read a waveform over 2*window_size + 1, centered at time
@@ -24,6 +77,10 @@ class Explorer(object):
             channels = range(self.n_channels)
 
         return self.data[start:end, channels]
+
+    def read_waveform_around_channel(self, time, channel):
+        return self.read_waveform(time,
+                                  channels=self.neighbors_for_channel(channel))
 
     def plot_waveform(self, time, channels, ax=None, line_at_t=False,
                       overlay=False):
@@ -43,5 +100,12 @@ class Explorer(object):
             waveform = self.read_waveform(time, ch)
             ax.plot(waveform)
 
-        if line_at_t:
-            ax.axvline(x=time + 1)
+            # if line_at_t:
+            #     ax.axvline(x=time + 1)
+
+    def plot_waveform_around_channel(self, time, channel, ax=None, line_at_t=False,
+                                     overlay=False):
+        return self.plot_waveform(time,
+                                    channels=self.neighbors_for_channel(channel),
+                                    ax=ax, line_at_t=line_at_t, overlay=overlay)
+

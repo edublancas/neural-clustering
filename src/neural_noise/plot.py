@@ -16,14 +16,7 @@ def waveforms(data, channels, time=None, dt=None):
         waveform(data, ch, time, dt, ax=ax)
 
 
-def waveform(data, channel=None, time=None, dt=None, ax=None):
-    ax = ax if ax else plt
-    spike = (data[:, channel] if not time
-             else data[time-dt-1:time+dt+1, channel])
-    ax.plot(spike)
 
-    if dt:
-        ax.axvline(x=dt + 1)
 
 
 def score(data, ax=None):
