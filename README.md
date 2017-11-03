@@ -2,17 +2,24 @@
 
 Neural noise project
 
+## Structure
+
+* notebooks/ - Jupyter notebooks
+* src/ - Source code for the package that implementsall the functions
+* yass_config/ - Confgiguration files for the YASS package
+* config.yaml - Project configuration file
+
 ## Installing requirements
 
 ```shell
 # clone repo
 git clone https://github.com/edublancas/neural-noise
 
-# install command line tools
+# install command line tools and other functions
 cd neural-noise
 pip install .
 
-# install notebooks dependencies
+# install notebooks/ dependencies
 pip install -r requirements.txt
 ```
 
@@ -38,7 +45,6 @@ jupyter notebook
 
 
 ## Other requirements
-
 
 tensorflow: https://github.com/lakshayg/tensorflow-build
 graphviz
