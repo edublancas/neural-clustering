@@ -47,24 +47,38 @@ class SpikeTrainExplorer(object):
         self.recording_explorer = recording_explorer
 
         if projection_matrix is not None:
-            ft_space = self._templates_in_feature_space
+            ft_space = self._reduce_dimension
             self.templates_feature_space = ft_space(self.templates,
                                                     projection_matrix)
         else:
             self.templates_feature_space = None
 
-    def _templates_in_feature_space(self, templates, projection_matrix):
-        """Reduce templates dimensionality
+    def _reduce_dimension(self, data, projection_matrix):
+        """Reduce dimensionality
         """
         R, n_features = projection_matrix.shape
-        nchannel, R, n_templates = templates.shape
+        nchannel, R, n_data = data.shape
 
         reduced = np.transpose(np.reshape(np.matmul(np.reshape(np.transpose(
-                    templates, [0, 2, 1]), (-1, R)), [projection_matrix]),
-                    (nchannel, n_templates, n_features)), (0, 2, 1))
+                    data, [0, 2, 1]), (-1, R)), [projection_matrix]),
+                    (nchannel, n_data, n_features)), (0, 2, 1))
 
         # flatten
         return np.reshape(reduced, [reduced.shape[0], -1])
+
+    def waveforms_for_group(self, group_id):
+        """Get waveforms for a certain group
+        """
+        times = self.times_for_group(group_id)
+        main = self.main_channel_for_group(group_id)
+
+        return [self.recording_explorer.read_waveform_around_channel(t, main)
+                for t in times]
+
+    def scores_for_group(self, group_id):
+        """Get waveforms for a certain group
+        """
+        waveforms = self.waveforms_for_group(group_id)
 
     def times_for_group(self, group_id):
         """
@@ -156,7 +170,6 @@ class SpikeTrainExplorer(object):
         ax = plt if ax is None else ax
 
         lda = LDA(n_components=2)
-        print(self.templates_feature_space.shape)
         lda.fit(self.templates_feature_space, group_ids)
         reduced = lda.transform(self.templates_feature_space)
 
