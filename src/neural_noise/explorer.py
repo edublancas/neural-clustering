@@ -35,9 +35,18 @@ def _make_grid_plot(fn, group_ids, ax, sharex, sharey):
 
 
 class SpikeTrainExplorer(object):
-    """
-        templates
-        spike_train
+    """Explore spike trains and templates
+
+    Parameters
+    ----------
+    templates: np.ndarray
+        Templates
+    spike_train: np.ndarray
+        Spike train
+    recording_explorer: RecordingExplorer, optional
+        Recording explorer instance
+    projection_matrix: np.ndarray, optional
+        Projection Matrix
     """
 
     def __init__(self, templates, spike_train, recording_explorer=None,
@@ -68,16 +77,16 @@ class SpikeTrainExplorer(object):
 
         return reduced
 
-    def waveforms_for_group(self, group_id):
-        """Get waveforms for a certain group
-        """
-        times = self.times_for_group(group_id)
-        main = self.main_channel_for_group(group_id)
-
-        read_wf = self.recording_explorer.read_waveform_around_channel
-        return np.stack([read_wf(t, main) for t in times])
-
     def scores_for_groups(self, group_ids, flatten=True):
+        """Get scores for one or more groups
+
+        Parameters
+        ----------
+        group_id: int or list
+            The id for one or more group
+        flatten: bool, optional
+            Flatten scores along channels, defaults to True
+        """
         group_ids = group_ids if _is_iter(group_ids) else [group_ids]
 
         waveforms = [self.waveforms_for_group(g) for g in group_ids]
@@ -88,27 +97,59 @@ class SpikeTrainExplorer(object):
                                       flatten=flatten), lengths
 
     def times_for_group(self, group_id):
-        """
+        """Get the spiking times for a group
+
+        Parameters
+        ----------
+        group_id: int
+            The id for the group
         """
         matches_group = self.spike_train[:, 1] == group_id
         return self.spike_train[matches_group][:, 0]
 
     def main_channel_for_group(self, group_id):
-        """
+        """Get the main channel for a group
+
+        Parameters
+        ----------
+        group_id: int
+            The id for the group
         """
         template = self.templates[:, :, group_id]
         main = np.argmax(np.max(template, axis=1))
         return main
 
     def neighbor_channels_for_group(self, group_id):
+        """Get the neighbor channels for a group
+
+        Parameters
+        ----------
+        group_id: int
+            The id for the group
+        """
         main = self.main_channel_for_group(group_id)
         neigh_matrix = self.recording_explorer.neigh_matrix
         return np.where(neigh_matrix[main])[0]
 
     def template_for_group(self, group_id):
+        """Get the template for a group
+
+        Parameters
+        ----------
+        group_id: int
+            The id for the group
+        """
         return self.templates[:, :, group_id]
 
-    def template_components(self, group_id, channels):
+    def waveforms_for_group(self, group_id, channels):
+        """Get the waveforms around a group
+
+        Parameters
+        ----------
+        group_id: int
+            The id for the group
+        """
+
         # get all spike times that form this group
         times = self.times_for_group(group_id)
 
