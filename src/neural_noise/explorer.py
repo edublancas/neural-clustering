@@ -1,7 +1,14 @@
+import collections
+from math import sqrt
+
 import numpy as np
 import matplotlib.pyplot as plt
 
 from yass import geometry
+
+
+def _is_iter(obj):
+    return isinstance(collections.Iterable)
 
 
 class SpikeTrainExplorer(object):
@@ -9,6 +16,7 @@ class SpikeTrainExplorer(object):
         templates
         spike_train
     """
+
     def __init__(self, templates, spike_train, recording_explorer=None):
         self.spike_train = spike_train
         self.templates = templates
@@ -46,6 +54,39 @@ class SpikeTrainExplorer(object):
         around = self.recording_explorer.read_waveform_around_channel
         return [around(t, main) for t in times]
 
+    def close_templates(self, group_id, k):
+        """return K similar templates
+        """
+        difference = np.sum(np.square(self.templates -
+                                      self.templates[:, :, [group_id]]),
+                            axis=(0, 1))
+        close_to_far_idx = np.argsort(difference)
+        return close_to_far_idx[:k]
+
+    def _plot_template(self, group_id, ax=None):
+        """Plot a single template
+        """
+        ax = ax if ax else plt
+        template = self.template_for_group(group_id)
+        ax.plot(template.T)
+
+    def plot_templates(self, group_ids, ax=None):
+        """Plot templates
+
+        group_ids: int or list
+            Groups to plot, it can be either a single group or a list of groups
+        """
+        group_ids = group_ids if _is_iter(group_ids) else [group_ids]
+
+        cols = sqrt(len(group_ids))
+        rows = cols + 1
+
+        f, axs = ax.subplots(rows, cols)
+        ax = [item for sublist in axs for item in sublist]
+
+        for g, ax in zip(group_ids, axs):
+            self._plot_template(g, ax)
+
 
 class RecordingExplorer(object):
 
@@ -65,6 +106,8 @@ class RecordingExplorer(object):
         self.window_size = window_size
 
     def neighbors_for_channel(self, channel):
+        """Get the neighbors for the channel
+        """
         return np.where(self.neigh_matrix[channel])[0]
 
     def read_waveform(self, time, channels='all'):
@@ -106,6 +149,5 @@ class RecordingExplorer(object):
     def plot_waveform_around_channel(self, time, channel, ax=None, line_at_t=False,
                                      overlay=False):
         return self.plot_waveform(time,
-                                    channels=self.neighbors_for_channel(channel),
-                                    ax=ax, line_at_t=line_at_t, overlay=overlay)
-
+                                  channels=self.neighbors_for_channel(channel),
+                                  ax=ax, line_at_t=line_at_t, overlay=overlay)
