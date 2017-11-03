@@ -3,7 +3,6 @@ edward
 pyyaml
 jupyter
 matplotlib
-pandas
 # yass
 # tensorflow
 
