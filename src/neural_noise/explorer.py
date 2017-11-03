@@ -1,5 +1,5 @@
 import collections
-from math import sqrt
+from math import sqrt, ceil, floor
 from functools import partial
 
 import numpy as np
@@ -16,8 +16,8 @@ def _is_iter(obj):
 
 def _grid_size(group_ids):
     sq = sqrt(len(group_ids))
-    cols = int(sq)
-    rows = cols if sq.is_integer() else cols + 1
+    cols = floor(sq)
+    rows = ceil(sq)
     return rows, cols
 
 
@@ -25,6 +25,7 @@ def _make_grid_plot(fn, group_ids, ax, sharex, sharey):
     rows, cols = _grid_size(group_ids)
 
     f, axs = ax.subplots(rows, cols, sharex=sharex, sharey=sharey)
+
     axs = axs if _is_iter(axs) else [axs]
 
     if cols > 1:
@@ -91,8 +92,8 @@ class SpikeTrainExplorer(object):
         group_ids = group_ids if _is_iter(group_ids) else [group_ids]
 
         waveforms = [self.waveforms_for_group(g) for g in group_ids]
-        lengths = np.hstack([np.ones(w.shape[0]) * g for g, w in zip(group_ids,
-                                                                     waveforms)])
+        lengths = np.hstack([np.ones(w.shape[0])*g for g, w in zip(group_ids,
+                                                                   waveforms)])
 
         return self._reduce_dimension(np.vstack(waveforms),
                                       flatten=flatten), lengths
