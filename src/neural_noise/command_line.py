@@ -35,17 +35,17 @@ def run_yass():
 
     cfg = config.load(args.config)
 
-    path_to_yass_output = os.path.join(cfg.root, 'yass')
+    path_to_yass_output = os.path.join(cfg['root'], 'yass')
 
     if not os.path.exists(path_to_yass_output):
         os.makedirs(path_to_yass_output)
 
     # save all results from yass
-    np.save(os.path.join(path_to_yass_output, 'score', score))
-    np.save(os.path.join(path_to_yass_output, 'clear_index', clear_index))
-    np.save(os.path.join(path_to_yass_output, 'spike_times', spike_times))
-    np.save(os.path.join(path_to_yass_output, 'spike_train', spike_train))
-    np.save(os.path.join(path_to_yass_output, 'spike_left', spike_left))
-    np.save(os.path.join(path_to_yass_output, 'templates', templates))
+    np.save(os.path.join(path_to_yass_output, 'score'), score)
+    np.save(os.path.join(path_to_yass_output, 'clear_index'), clear_index)
+    np.save(os.path.join(path_to_yass_output, 'spike_times'), spike_times)
+    np.save(os.path.join(path_to_yass_output, 'spike_train'), spike_train)
+    np.save(os.path.join(path_to_yass_output, 'spike_left'), spike_left)
+    np.save(os.path.join(path_to_yass_output, 'templates'), templates)
 
     logger.info(f'Done. Files saved at {path_to_yass_output}')
