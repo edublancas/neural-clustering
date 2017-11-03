@@ -6,7 +6,7 @@ import yass
 from yass import preprocess, process
 import numpy as np
 
-from neural_noise import config
+from . import config
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
