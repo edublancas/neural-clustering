@@ -26,14 +26,8 @@ pip install -r requirements.txt
 ## Running pipeline
 
 ```shell
-# extract waveforms
-get-waveforms config_sample.yaml
-
-# extract noise
-get-noise config_sample.yaml
-
-# fit noise model using edward
-fit-noise config_sample.yaml
+# run yass pipeline to process neural data
+run_yass yass_config/local_100k.yaml config.yaml
 ```
 
 
