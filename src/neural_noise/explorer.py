@@ -8,7 +8,7 @@ from yass import geometry
 
 
 def _is_iter(obj):
-    return isinstance(collections.Iterable)
+    return isinstance(obj, collections.Iterable)
 
 
 class SpikeTrainExplorer(object):
