@@ -1,7 +1,10 @@
 import collections
 from math import sqrt
+from functools import partial
 
 import numpy as np
+from sklearn.decomposition import PCA
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 import matplotlib.pyplot as plt
 
 from yass import geometry
@@ -11,16 +14,55 @@ def _is_iter(obj):
     return isinstance(obj, collections.Iterable)
 
 
+def _grid_size(group_ids):
+    sq = sqrt(len(group_ids))
+    cols = int(sq)
+    rows = cols if sq.is_integer() else cols + 1
+    return rows, cols
+
+
+def _make_grid_plot(fn, group_ids, ax, sharex, sharey):
+    rows, cols = _grid_size(group_ids)
+
+    f, axs = ax.subplots(rows, cols, sharex=sharex, sharey=sharey)
+    axs = axs if _is_iter(axs) else [axs]
+
+    if cols > 1:
+        axs = [item for sublist in axs for item in sublist]
+
+    for g, ax in zip(group_ids, axs):
+        fn(groupd_id=g, ax=ax)
+
+
 class SpikeTrainExplorer(object):
     """
         templates
         spike_train
     """
 
-    def __init__(self, templates, spike_train, recording_explorer=None):
+    def __init__(self, templates, spike_train, recording_explorer=None,
+                 projection_matrix=None):
         self.spike_train = spike_train
         self.templates = templates
         self.recording_explorer = recording_explorer
+
+        if projection_matrix:
+            ft_space = self._templates_in_feature_space
+            self.templates_feature_space = ft_space(self.templates,
+                                                    projection_matrix)
+        else:
+            self.templates_feature_space = None
+
+    def _templates_in_feature_space(self, templates, projection_matrix):
+        """Reduce templates dimensionality
+        """
+        R, n_features = projection_matrix.shape
+        nchannel, R, n_templates = templates.shape
+
+        return np.transpose(np.reshape(
+            np.matmul(np.reshape(np.transpose(
+                templates, [0, 2, 1]), (-1, R)), [projection_matrix]),
+            (nchannel, n_templates, n_features)), (0, 2, 1))
 
     def times_for_group(self, group_id):
         """
@@ -80,19 +122,66 @@ class SpikeTrainExplorer(object):
         """
         ax = ax if ax else plt
         group_ids = group_ids if _is_iter(group_ids) else [group_ids]
+        _make_grid_plot(self._plot_template, group_ids, ax, sharex, sharey)
 
-        sq = sqrt(len(group_ids))
-        cols = int(sq)
-        rows = cols if sq.is_integer() else cols + 1
+    def plot_pca(self, group_ids, ax=None):
+        """
+        Reduce dimensionality using PCA and plot data
+        """
+        ax = ax if ax else plt
 
-        f, axs = ax.subplots(rows, cols, sharex=sharex, sharey=sharey)
-        axs = axs if _is_iter(axs) else [axs]
+        pca = PCA(n_components=2)
 
-        if cols > 1:
-            axs = [item for sublist in axs for item in sublist]
+        pca.fit(self.templates_feature_space)
+        reduced = pca.transform(self.templates_feature_space)
 
-        for g, ax in zip(group_ids, axs):
-            self._plot_template(g, ax)
+        for color in np.unique(group_ids).astype('int'):
+            plt.scatter(reduced[group_ids == color, 0],
+                        reduced[group_ids == color, 1],
+                        label='Group {}'.format(color, alpha=0.7))
+
+        ax.legend()
+
+    def plot_lda(self, group_ids, ax=None):
+        """
+        Reduce dimensionality using LDA and plot data
+        """
+        ax = plt if ax is None else ax
+
+        lda = LDA(n_components=2)
+        lda.fit(self.templates_feature_space, group_ids)
+        reduced = lda.transform(self.templates_feature_space)
+
+        for color in np.unique(group_ids).astype('int'):
+            ax.scatter(reduced[group_ids == color, 0],
+                       reduced[group_ids == color, 1],
+                       label='Group {}'.format(color), alpha=0.7)
+
+        ax.legend()
+
+    def visualize_closest_clusters(self, group_id, k, mode='LDA', ax=None):
+        """Visualize close clusters
+        """
+        ax = plt if ax is None else ax
+
+        groups = self.close_templates(group_id, k)
+
+        if mode == 'LDA':
+            self.plot_lda(groups, ax=ax)
+        elif mode == 'PCA':
+            self.plot_pca(groups, ax=ax)
+        else:
+            raise ValueError('Only PCA and LDA modes are supported')
+
+    def visualize_all_clusters(self, k, mode='LDA', ax=None,
+                               sharex=True, sharey=False):
+        ax = plt if ax is None else ax
+        all_ids = range(self.templates.shape[2])
+        rows, cols = _grid_size(all_ids)
+
+        fn = partial(self.visualize_closest_clusters, k=k, mode=mode)
+
+        _make_grid_plot(fn, all_ids, ax, sharex, sharey)
 
 
 class RecordingExplorer(object):
