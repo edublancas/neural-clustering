@@ -31,7 +31,7 @@ def _make_grid_plot(fn, group_ids, ax, sharex, sharey):
         axs = [item for sublist in axs for item in sublist]
 
     for g, ax in zip(group_ids, axs):
-        fn(groupd_id=g, ax=ax)
+        fn(group_id=g, ax=ax)
 
 
 class SpikeTrainExplorer(object):
