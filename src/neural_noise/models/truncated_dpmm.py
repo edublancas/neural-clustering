@@ -57,8 +57,8 @@ sigmasq = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
 sigma = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
 
 
-components = [MultivariateNormalDiag(mu[k], sigma[k], sample_shape=N)
-              for k in range(K)]
+# components = [MultivariateNormalDiag(mu[k], sigma[k], sample_shape=N)
+#               for k in range(K)]
 
 x = ParamMixture(pi, {'loc': mu, 'scale_diag': sigmasq},
                  MultivariateNormalDiag,
@@ -68,41 +68,38 @@ x = ParamMixture(pi, {'loc': mu, 'scale_diag': sigmasq},
 
 # Inference
 
-# find the parameters for each mixture model component
-# qmu = Normal(tf.Variable(tf.random_normal([K, D])),
-# tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))))
 
+# qmu = Normal(tf.Variable(tf.random_normal([K, D])),
+#              tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))))
 # qbeta = Beta(tf.nn.softplus(tf.Variable(tf.random_normal([T]))),
 #              tf.nn.softplus(tf.Variable(tf.random_normal([T]))))
 
+# doesnt work - nans
 # inference = ed.KLqp({beta: qbeta, mu: qmu}, data={x: x_train})
-#
+
 
 # number of samples
-S = 100000
+S = 40000
 
 qmu = Empirical(tf.Variable(tf.zeros([S, K, D])))
 qbeta = Empirical(tf.Variable(tf.zeros([S, K])))
 
-# inference = ed.HMC({beta: qbeta, mu: qmu}, data={x: x_train})
-# inference.initialize(n_steps=5)
+# doesnt work - KeyError
+inference = ed.SGHMC({beta: qbeta, mu: qmu}, data={x: x_train})
+# doesnt work - NotImplementedError
+inference = ed.Gibbs({beta: qbeta, mu: qmu}, data={x: x_train})
 
+# works
+inference = ed.HMC({beta: qbeta, mu: qmu}, data={x: x_train})
 inference = ed.SGLD({beta: qbeta, mu: qmu}, data={x: x_train})
+
+
 inference.initialize()
 
 
 sess = ed.get_session()
 init = tf.global_variables_initializer()
 init.run()
-
-
-# for _ in range(inference.n_iter):
-#     info_dict = inference.update()
-#     inference.print_progress(info_dict)
-#     t = info_dict['t']
-
-#     if t % inference.n_print == 0:
-#       print(t)
 
 
 for _ in range(inference.n_iter):
@@ -134,6 +131,8 @@ log_liks = tf.reduce_mean(log_liks, 1)
 
 # Choose the cluster with the highest likelihood for each data point.
 clusters = tf.argmax(log_liks, 1).eval()
+
+print('Found {} clusters'.format(len(np.unique(clusters))))
 
 plt.scatter(x_train[:, 0], x_train[:, 1], c=clusters, cmap=cm.bwr)
 plt.axis([-3, 3, -3, 3])
