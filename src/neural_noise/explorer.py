@@ -288,7 +288,7 @@ class RecordingExplorer(object):
         start = time - self.window_size
         end = time + self.window_size + 1
 
-        if channels == 'all':
+        if isinstance(channels, str) and channels == 'all':
             channels = range(self.n_channels)
 
         return self.data[start:end, channels]
