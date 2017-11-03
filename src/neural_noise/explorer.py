@@ -45,26 +45,28 @@ class SpikeTrainExplorer(object):
         self.spike_train = spike_train
         self.templates = templates
         self.recording_explorer = recording_explorer
+        self.projection_matrix = projection_matrix
 
         if projection_matrix is not None:
             ft_space = self._reduce_dimension
-            self.templates_feature_space = ft_space(self.templates,
-                                                    projection_matrix)
+            self.templates_feature_space = ft_space(self.templates)
         else:
             self.templates_feature_space = None
 
-    def _reduce_dimension(self, data, projection_matrix):
+    def _reduce_dimension(self, data, flatten=False):
         """Reduce dimensionality
         """
-        R, n_features = projection_matrix.shape
+        R, n_features = self.projection_matrix.shape
         nchannel, R, n_data = data.shape
 
         reduced = np.transpose(np.reshape(np.matmul(np.reshape(np.transpose(
-                    data, [0, 2, 1]), (-1, R)), [projection_matrix]),
+                    data, [0, 2, 1]), (-1, R)), [self.projection_matrix]),
                     (nchannel, n_data, n_features)), (0, 2, 1))
 
-        # flatten
-        return np.reshape(reduced, [reduced.shape[0], -1])
+        if flatten:
+            reduced = np.reshape(reduced, [reduced.shape[0], -1])
+
+        return reduced
 
     def waveforms_for_group(self, group_id):
         """Get waveforms for a certain group
@@ -72,19 +74,24 @@ class SpikeTrainExplorer(object):
         times = self.times_for_group(group_id)
         main = self.main_channel_for_group(group_id)
 
-        return [self.recording_explorer.read_waveform_around_channel(t, main)
-                for t in times]
+        read_wf = self.recording_explorer.read_waveform_around_channel
+        return np.stack([read_wf(t, main) for t in times])
 
-    def scores_for_group(self, group_id):
-        """Get waveforms for a certain group
-        """
-        waveforms = self.waveforms_for_group(group_id)
+    def scores_for_groups(self, group_ids, flatten=True):
+        group_ids = group_ids if _is_iter(group_ids) else [group_ids]
+
+        waveforms = [self.waveforms_for_group(g) for g in group_ids]
+        lengths = np.hstack([np.ones(w.shape[0]) * g for g, w in zip(group_ids,
+                             waveforms)])
+
+        return self._reduce_dimension(np.vstack(waveforms),
+                                      flatten=flatten), lengths
 
     def times_for_group(self, group_id):
         """
         """
         matches_group = self.spike_train[:, 1] == group_id
-        return self.spike_train[:, matches_group]
+        return self.spike_train[matches_group][:, 0]
 
     def main_channel_for_group(self, group_id):
         """
@@ -119,7 +126,7 @@ class SpikeTrainExplorer(object):
                                       self.templates[:, :, [group_id]]),
                             axis=(0, 1))
         close_to_far_idx = np.argsort(difference)
-        return close_to_far_idx[:k]
+        return close_to_far_idx[:k+1]
 
     def _plot_template(self, group_id, ax=None):
         """Plot a single template
@@ -146,14 +153,14 @@ class SpikeTrainExplorer(object):
         """
         ax = ax if ax else plt
 
-        pca = PCA(n_components=2)
+        scores, labels = self.scores_for_groups(group_ids)
 
-        pca.fit(self.templates_feature_space)
-        reduced = pca.transform(self.templates_feature_space)
+        pca = PCA(n_components=2)
+        reduced = pca.fit_transform(scores)
 
         for color in np.unique(group_ids).astype('int'):
-            x = reduced[group_ids == color, 0]
-            y = reduced[group_ids == color, 1]
+            x = reduced[labels == color, 0]
+            y = reduced[labels == color, 1]
 
             if sample:
                 x = np.random.choice(x, size=int(sample*len(x)), replace=False)
@@ -169,13 +176,14 @@ class SpikeTrainExplorer(object):
         """
         ax = plt if ax is None else ax
 
+        scores, labels = self.scores_for_groups(group_ids)
+
         lda = LDA(n_components=2)
-        lda.fit(self.templates_feature_space, group_ids)
-        reduced = lda.transform(self.templates_feature_space)
+        reduced = lda.fit_transform(scores, labels)
 
         for color in np.unique(group_ids).astype('int'):
-            x = reduced[group_ids == color, 0]
-            y = reduced[group_ids == color, 1]
+            x = reduced[labels == color, 0]
+            y = reduced[labels == color, 1]
 
             if sample:
                 x = np.random.choice(x, size=int(sample*len(x)), replace=False)
