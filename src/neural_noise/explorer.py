@@ -46,7 +46,7 @@ class SpikeTrainExplorer(object):
         self.templates = templates
         self.recording_explorer = recording_explorer
 
-        if projection_matrix:
+        if projection_matrix is not None:
             ft_space = self._templates_in_feature_space
             self.templates_feature_space = ft_space(self.templates,
                                                     projection_matrix)
@@ -154,6 +154,7 @@ class SpikeTrainExplorer(object):
         ax = plt if ax is None else ax
 
         lda = LDA(n_components=2)
+        print(self.templates_feature_space.shape)
         lda.fit(self.templates_feature_space, group_ids)
         reduced = lda.transform(self.templates_feature_space)
 
