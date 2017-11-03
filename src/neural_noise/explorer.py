@@ -55,6 +55,7 @@ class SpikeTrainExplorer(object):
         self.templates = templates
         self.recording_explorer = recording_explorer
         self.projection_matrix = projection_matrix
+        self.all_ids = list(range(self.templates.shape[2]))
 
         if projection_matrix is not None:
             ft_space = self._reduce_dimension
@@ -69,8 +70,8 @@ class SpikeTrainExplorer(object):
         nchannel, R, n_data = data.shape
 
         reduced = np.transpose(np.reshape(np.matmul(np.reshape(np.transpose(
-                    data, [0, 2, 1]), (-1, R)), [self.projection_matrix]),
-                    (nchannel, n_data, n_features)), (0, 2, 1))
+            data, [0, 2, 1]), (-1, R)), [self.projection_matrix]),
+            (nchannel, n_data, n_features)), (0, 2, 1))
 
         if flatten:
             reduced = np.reshape(reduced, [reduced.shape[0], -1])
@@ -91,7 +92,7 @@ class SpikeTrainExplorer(object):
 
         waveforms = [self.waveforms_for_group(g) for g in group_ids]
         lengths = np.hstack([np.ones(w.shape[0]) * g for g, w in zip(group_ids,
-                             waveforms)])
+                                                                     waveforms)])
 
         return self._reduce_dimension(np.vstack(waveforms),
                                       flatten=flatten), lengths
@@ -180,10 +181,15 @@ class SpikeTrainExplorer(object):
     def plot_templates(self, group_ids, ax=None, sharex=True, sharey=False):
         """Plot templates
 
-        group_ids: int or list
-            Groups to plot, it can be either a single group or a list of groups
+        group_ids: int or list or str
+            Groups to plot, it can be either a single group, a list of groups
+            or 'all'
         """
         ax = ax if ax else plt
+
+        if isinstance(group_ids, str) and group_ids == 'all':
+            group_ids = self.all_ids
+
         group_ids = group_ids if _is_iter(group_ids) else [group_ids]
         _make_grid_plot(self._plot_template, group_ids, ax, sharex, sharey)
 
@@ -233,8 +239,8 @@ class SpikeTrainExplorer(object):
 
         ax.legend()
 
-    def visualize_closest_clusters(self, group_id, k, mode='LDA', sample=None,
-                                   ax=None):
+    def plot_closest_clusters_to(self, group_id, k, mode='LDA',
+                                 sample=None, ax=None):
         """Visualize close clusters
         """
         ax = plt if ax is None else ax
@@ -248,16 +254,24 @@ class SpikeTrainExplorer(object):
         else:
             raise ValueError('Only PCA and LDA modes are supported')
 
-    def visualize_all_clusters(self, k, mode='LDA', sample=None, ax=None,
-                               sharex=True, sharey=False):
+    def plot_closest_templates_to(self, group_id, k, ax=None,
+                                  sharex=True, sharey=False):
+        """Visualize close templates
+        """
         ax = plt if ax is None else ax
-        all_ids = range(self.templates.shape[2])
-        rows, cols = _grid_size(all_ids)
 
-        fn = partial(self.visualize_closest_clusters, k=k, mode=mode,
+        groups = self.close_templates(group_id, k)
+        self.plot_templates(groups, ax=ax, sharex=sharex, sharey=sharex)
+
+    def plot_all_clusters(self, k, mode='LDA', sample=None, ax=None,
+                          sharex=True, sharey=False):
+        ax = plt if ax is None else ax
+        rows, cols = _grid_size(self.all_ids)
+
+        fn = partial(self.plot_closest_clusters_to, k=k, mode=mode,
                      sample=sample)
 
-        _make_grid_plot(fn, all_ids, ax, sharex, sharey)
+        _make_grid_plot(fn, self.all_ids, ax, sharex, sharey)
 
 
 class RecordingExplorer(object):
