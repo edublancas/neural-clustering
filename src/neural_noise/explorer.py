@@ -149,7 +149,6 @@ class SpikeTrainExplorer(object):
         group_id: int
             The id for the group
         """
-
         # get all spike times that form this group
         times = self.times_for_group(group_id)
 
@@ -158,7 +157,7 @@ class SpikeTrainExplorer(object):
 
         # get waveforms around the group
         around = self.recording_explorer.read_waveform_around_channel
-        return np.vstack([around(t, main) for t in times])
+        return np.stack([around(t, main) for t in times])
 
     def close_templates(self, group_id, k):
         """return K similar templates
