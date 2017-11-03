@@ -69,20 +69,27 @@ class SpikeTrainExplorer(object):
         ax = ax if ax else plt
         template = self.template_for_group(group_id)
         ax.plot(template.T)
+        ax.set_title('Template {}'.format(group_id))
+        plt.tight_layout()
 
-    def plot_templates(self, group_ids, ax=None):
+    def plot_templates(self, group_ids, ax=None, sharex=True, sharey=False):
         """Plot templates
 
         group_ids: int or list
             Groups to plot, it can be either a single group or a list of groups
         """
+        ax = ax if ax else plt
         group_ids = group_ids if _is_iter(group_ids) else [group_ids]
 
-        cols = sqrt(len(group_ids))
-        rows = cols + 1
+        sq = sqrt(len(group_ids))
+        cols = int(sq)
+        rows = cols if sq.is_integer() else cols + 1
 
-        f, axs = ax.subplots(rows, cols)
-        ax = [item for sublist in axs for item in sublist]
+        f, axs = ax.subplots(rows, cols, sharex=sharex, sharey=sharey)
+        axs = axs if _is_iter(axs) else [axs]
+
+        if cols > 1:
+            axs = [item for sublist in axs for item in sublist]
 
         for g, ax in zip(group_ids, axs):
             self._plot_template(g, ax)
