@@ -2,7 +2,7 @@ import os.path
 import yaml
 
 
-def config(path_to_config):
+def load(path_to_config):
     """Load yaml config file
     """
     def _expand(k, v):

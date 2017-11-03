@@ -2,68 +2,50 @@ import logging
 import argparse
 import os
 
-import pandas as pd
+import yass
+from yass import preprocess, process
 import numpy as np
 
-import yass
-from yass import preprocess
+from neural_noise import config
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def extract_waveforms():
+def run_yass():
     """
-    Run yass pipeline to extract ans save scores, clear_indexes and
-    spike times
+    Run yass preprocess and process steps, saves all results to the
+    projects root path under yass folder
     """
-    parser = argparse.ArgumentParser(description='Extract waveforms')
-    parser.add_argument('config', type=str,
+    parser = argparse.ArgumentParser(description='Run YASS preprocess and'
+                                     ' process')
+    parser.add_argument('yass_config', type=str,
                         help='Path to YASS configuration file')
+    parser.add_argument('config', type=str,
+                        help='Path to configuration file')
+
     args = parser.parse_args()
 
-    yass.set_config(args.config)
+    yass.set_config(args.yass_config)
+
     score, clear_index, spike_times = preprocess.run()
 
-    cfg = yass.read_config()
+    spike_train, spike_left, templates = process.run(score, clear_index,
+                                                     spike_times)
 
-    def get_score(row):
-        if row.clear:
-            channel_scores = score[row.channel]
-            return channel_scores[int(row.score_idx)].tolist()
-        else:
-            return np.nan
+    cfg = config.load(args.config)
 
-    def make_spike_times_df(spike_times, channel):
-        df = pd.DataFrame(spike_times)
+    path_to_yass_output = os.path.join(cfg.root, 'yass')
 
-        df.columns = ['time', 'batch']
-        df['channel'] = channel
-        df.reset_index(inplace=True)
-        df['clear'] = df['index'].apply(lambda idx: idx
-                                        in clear_index[channel])
+    if not os.path.exists(path_to_yass_output):
+        os.makedirs(path_to_yass_output)
 
-        df['score_idx'] = np.nan
-        df.loc[df.clear, 'score_idx'] = (np.arange(len(df[df.clear]))
-                                         .astype('int'))
-        df['score'] = df.apply(get_score, axis=1)
-        return df
+    # save all results from yass
+    np.save(os.path.join(path_to_yass_output, 'score', score))
+    np.save(os.path.join(path_to_yass_output, 'clear_index', clear_index))
+    np.save(os.path.join(path_to_yass_output, 'spike_times', spike_times))
+    np.save(os.path.join(path_to_yass_output, 'spike_train', spike_train))
+    np.save(os.path.join(path_to_yass_output, 'spike_left', spike_left))
+    np.save(os.path.join(path_to_yass_output, 'templates', templates))
 
-    dfs = [make_spike_times_df(spt, ch)
-           for ch, spt in enumerate(spike_times)]
-    df = pd.concat(dfs)
-
-    path_to_pickle = os.path.join(cfg.root, 'noise')
-    path_to_pickle_file = os.path.join(path_to_pickle, 'waveforms.pickle')
-
-    if not os.path.exists(path_to_pickle):
-        os.makedirs(path_to_pickle)
-
-    # we only care about clear spikes
-    clear_spikes = df[df.clear][['time', 'channel']]
-
-    scores = np.vstack([s for s in score])
-
-    df.to_pickle(path_to_pickle_file)
-
-    logger.info(f'Done. Waveforms saved at {path_to_pickle_file}')
+    logger.info(f'Done. Files saved at {path_to_yass_output}')
