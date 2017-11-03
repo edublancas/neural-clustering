@@ -124,7 +124,7 @@ class SpikeTrainExplorer(object):
         group_ids = group_ids if _is_iter(group_ids) else [group_ids]
         _make_grid_plot(self._plot_template, group_ids, ax, sharex, sharey)
 
-    def plot_pca(self, group_ids, ax=None):
+    def plot_pca(self, group_ids, sample=None, ax=None):
         """
         Reduce dimensionality using PCA and plot data
         """
@@ -136,13 +136,18 @@ class SpikeTrainExplorer(object):
         reduced = pca.transform(self.templates_feature_space)
 
         for color in np.unique(group_ids).astype('int'):
-            plt.scatter(reduced[group_ids == color, 0],
-                        reduced[group_ids == color, 1],
-                        label='Group {}'.format(color, alpha=0.7))
+            x = reduced[group_ids == color, 0]
+            y = reduced[group_ids == color, 1]
+
+            if sample:
+                x = np.random.choice(x, size=int(sample*len(x)), replace=False)
+                y = np.random.choice(x, size=int(sample*len(y)), replace=False)
+
+            plt.scatter(x, y, label='Group {}'.format(color, alpha=0.7))
 
         ax.legend()
 
-    def plot_lda(self, group_ids, ax=None):
+    def plot_lda(self, group_ids, sample=None, ax=None):
         """
         Reduce dimensionality using LDA and plot data
         """
@@ -153,13 +158,19 @@ class SpikeTrainExplorer(object):
         reduced = lda.transform(self.templates_feature_space)
 
         for color in np.unique(group_ids).astype('int'):
-            ax.scatter(reduced[group_ids == color, 0],
-                       reduced[group_ids == color, 1],
-                       label='Group {}'.format(color), alpha=0.7)
+            x = reduced[group_ids == color, 0]
+            y = reduced[group_ids == color, 1]
+
+            if sample:
+                x = np.random.choice(x, size=int(sample*len(x)), replace=False)
+                y = np.random.choice(x, size=int(sample*len(y)), replace=False)
+
+            ax.scatter(x, y, label='Group {}'.format(color), alpha=0.7)
 
         ax.legend()
 
-    def visualize_closest_clusters(self, group_id, k, mode='LDA', ax=None):
+    def visualize_closest_clusters(self, group_id, k, mode='LDA', sample=None,
+                                   ax=None):
         """Visualize close clusters
         """
         ax = plt if ax is None else ax
@@ -167,19 +178,20 @@ class SpikeTrainExplorer(object):
         groups = self.close_templates(group_id, k)
 
         if mode == 'LDA':
-            self.plot_lda(groups, ax=ax)
+            self.plot_lda(groups, sample=sample, ax=ax)
         elif mode == 'PCA':
-            self.plot_pca(groups, ax=ax)
+            self.plot_pca(groups, sample=sample, ax=ax)
         else:
             raise ValueError('Only PCA and LDA modes are supported')
 
-    def visualize_all_clusters(self, k, mode='LDA', ax=None,
+    def visualize_all_clusters(self, k, mode='LDA', sample=None, ax=None,
                                sharex=True, sharey=False):
         ax = plt if ax is None else ax
         all_ids = range(self.templates.shape[2])
         rows, cols = _grid_size(all_ids)
 
-        fn = partial(self.visualize_closest_clusters, k=k, mode=mode)
+        fn = partial(self.visualize_closest_clusters, k=k, mode=mode,
+                     sample=sample)
 
         _make_grid_plot(fn, all_ids, ax, sharex, sharey)
 
