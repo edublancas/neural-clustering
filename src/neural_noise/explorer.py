@@ -59,10 +59,12 @@ class SpikeTrainExplorer(object):
         R, n_features = projection_matrix.shape
         nchannel, R, n_templates = templates.shape
 
-        return np.transpose(np.reshape(
-            np.matmul(np.reshape(np.transpose(
-                templates, [0, 2, 1]), (-1, R)), [projection_matrix]),
-            (nchannel, n_templates, n_features)), (0, 2, 1))
+        reduced = np.transpose(np.reshape(np.matmul(np.reshape(np.transpose(
+                    templates, [0, 2, 1]), (-1, R)), [projection_matrix]),
+                    (nchannel, n_templates, n_features)), (0, 2, 1))
+
+        # flatten
+        return np.reshape(reduced, [reduced.shape[0], -1])
 
     def times_for_group(self, group_id):
         """
