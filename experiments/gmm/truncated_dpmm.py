@@ -1,18 +1,16 @@
-#!/usr/bin/env python
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+"""
+Truncated DPMM
+"""
+from edward.models import (Normal, MultivariateNormalDiag, Categorical, Beta,
+                           InverseGamma,  ParamMixture, Empirical)
 
 import edward as ed
-import matplotlib.cm as cm
 import numpy as np
-# import seaborn as sns
 import tensorflow as tf
 
-from edward.models import \
-    Normal, MultivariateNormalDiag, Mixture, Categorical, Beta, InverseGamma, \
-    ParamMixture, Empirical, Gamma
+
 from matplotlib import pyplot as plt
+import matplotlib.cm as cm
 
 
 def build_toy_dataset(N):
@@ -21,69 +19,46 @@ def build_toy_dataset(N):
     stds = [[0.1, 0.1], [0.1, 0.1]]
     x = np.zeros((N, 2), dtype=np.float32)
     for n in range(N):
-      k = np.argmax(np.random.multinomial(1, pi))
-      x[n, :] = np.random.multivariate_normal(mus[k], np.diag(stds[k]))
+        k = np.argmax(np.random.multinomial(1, pi))
+        x[n, :] = np.random.multivariate_normal(mus[k], np.diag(stds[k]))
 
     return x
 
 
 def stick_breaking(v):
-  remaining_pieces = tf.concat([tf.ones(1), tf.cumprod(1.0 - v)[:-1]], 0)
-  return v * remaining_pieces
+    remaining_pieces = tf.concat([tf.ones(1), tf.cumprod(1.0 - v)[:-1]], 0)
+    return v * remaining_pieces
 
 
 ed.set_seed(0)
+
 N = 500
 D = 2
 T = K = 10  # truncation level in DP
-alpha = 0.5
 
-# DATA
 x_train = build_toy_dataset(N)
 # plt.scatter(x_train[:, 0], x_train[:, 1])
 # plt.axis([-3, 3, -3, 3])
 # plt.title("Data")
 # plt.show()
 
-# MODEL
-beta = Beta(tf.ones(T), tf.ones(T))
-beta
 
+# Model
+
+
+beta = Beta(tf.ones(T), tf.ones(T))
 pi = stick_breaking(beta)
-pi
 
 cat = Categorical(probs=pi, sample_shape=N)
-cat
-
-# mu = Normal(tf.zeros([K, D]), tf.ones([K, D]))
 
 mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
-# sigma = Gamma(tf.ones(D), tf.ones(D), sample_shape=K)
-
 sigmasq = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
+
 sigma = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
 
 
-
-# components = [MultivariateNormalDiag(tf.ones([N, 1]) * tf.gather(mu, k),
-#                                      tf.ones([N, D]) * 0.1)
-#               for k in range(K)]
-
-# components = [MultivariateNormalDiag(tf.ones([N, 1]) * tf.gather(mu, k),
-#                                      tf.ones([N, D]) * 0.1)
-#               for k in range(K)]
-
-components = [
-    MultivariateNormalDiag(mu[k], sigma[k], sample_shape=N)
-    for k in range(K)]
-
-components
-
-pi, cat, components
-
-
-# x = Mixture(cat=cat, components=components, sample_shape=N)
-# x
+components = [MultivariateNormalDiag(mu[k], sigma[k], sample_shape=N)
+              for k in range(K)]
 
 x = ParamMixture(pi, {'loc': mu, 'scale_diag': sigmasq},
                  MultivariateNormalDiag,
@@ -91,25 +66,23 @@ x = ParamMixture(pi, {'loc': mu, 'scale_diag': sigmasq},
 
 # z = x.cat
 
-
-
-# INFERENCE
+# Inference
 
 # find the parameters for each mixture model component
 # qmu = Normal(tf.Variable(tf.random_normal([K, D])),
-             # tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))))
+# tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))))
 
 # qbeta = Beta(tf.nn.softplus(tf.Variable(tf.random_normal([T]))),
 #              tf.nn.softplus(tf.Variable(tf.random_normal([T]))))
 
 # inference = ed.KLqp({beta: qbeta, mu: qmu}, data={x: x_train})
-# 
+#
 
+# number of samples
 S = 100000
 
 qmu = Empirical(tf.Variable(tf.zeros([S, K, D])))
 qbeta = Empirical(tf.Variable(tf.zeros([S, K])))
-qbeta
 
 # inference = ed.HMC({beta: qbeta, mu: qmu}, data={x: x_train})
 # inference.initialize(n_steps=5)
@@ -117,9 +90,6 @@ qbeta
 inference = ed.SGLD({beta: qbeta, mu: qmu}, data={x: x_train})
 inference.initialize()
 
-
-
-# inference.initialize(n_samples=5, n_iter=100, n_print=25)
 
 sess = ed.get_session()
 init = tf.global_variables_initializer()
@@ -136,24 +106,20 @@ init.run()
 
 
 for _ in range(inference.n_iter):
-  info_dict = inference.update()
-  inference.print_progress(info_dict)
+    info_dict = inference.update()
+    inference.print_progress(info_dict)
 
-  t = info_dict['t']
+    t = info_dict['t']
 
-  if t % inference.n_print == 0:
-    print("Inferred cluster means:")
-    print(sess.run(qmu.mean()))
-    print('scale')
-    # print(sess.run(qmu.scale))
-    print('beta params')
-    # print(sess.run(qbeta.concentration1))
-    # print(sess.run(qbeta.concentration0))
+    if t % inference.n_print == 0:
+        print("Inferred cluster means:")
+        print(sess.run(qmu.mean()))
 
-# CRITICISM
+# Criticism
 # Calculate likelihood for each data point and cluster assignment,
 # averaged over many posterior samples. ``x_post`` has shape (N, 100, K, D).
 SC = 1000
+
 mu_sample = qmu.sample(SC)
 x_post = Normal(tf.ones([N, 1, 1, 1]) * mu_sample,
                 tf.ones([N, 1, 1, 1]) * 0.1)
