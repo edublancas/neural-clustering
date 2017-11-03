@@ -319,8 +319,8 @@ class RecordingExplorer(object):
             # if line_at_t:
             #     ax.axvline(x=time + 1)
 
-    def plot_waveform_around_channel(self, time, channel, ax=None, line_at_t=False,
-                                     overlay=False):
+    def plot_waveform_around_channel(self, time, channel, ax=None,
+                                     line_at_t=False, overlay=False):
         return self.plot_waveform(time,
                                   channels=self.neighbors_for_channel(channel),
                                   ax=ax, line_at_t=line_at_t, overlay=overlay)
