@@ -251,7 +251,8 @@ class SpikeTrainExplorer(object):
         groups = self.close_templates(group_id, k)
 
         # get the neighbors for the main channel in group_id
-        neighbors = self.recording_explorer.neighbors_for_channel(group_id)
+        main = self.main_channel_for_group(group_id)
+        neighbors = self.recording_explorer.neighbors_for_channel(main)
 
         if mode == 'LDA':
             self.plot_lda(groups, neighbors, sample=sample, ax=ax)
