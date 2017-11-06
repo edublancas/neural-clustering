@@ -4,11 +4,6 @@ Plotting functions
 import matplotlib.pyplot as plt
 
 
-def geometry(geom):
-    x, y = geom.T
-    plt.scatter(x, y)
-
-
 def waveforms(data, channels, time=None, dt=None):
     f, axs = plt.subplots(len(channels), 1)
 
