@@ -6,6 +6,7 @@ import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
 from yass import geometry
 
 from .util import ensure_iterator
@@ -320,6 +321,7 @@ class RecordingExplorer(object):
                  n_channels, neighbor_radius):
         self.data = np.fromfile(path_to_readings, dtype)
         self.geom = geometry.parse(path_to_geom, n_channels)
+        self.neighbor_radius = neighbor_radius
         self.neigh_matrix = geometry.find_channel_neighbors(self.geom,
                                                             neighbor_radius)
 
@@ -377,3 +379,19 @@ class RecordingExplorer(object):
         return self.plot_waveform(time,
                                   channels=self.neighbors_for_channel(channel),
                                   ax=ax, line_at_t=line_at_t, overlay=overlay)
+
+    def plot_geometry(self, neighbor_radius=False, ax=None):
+        """Plot geometry file
+        """
+        ax = ax if ax else plt.gca()
+
+        x, y = self.geom.T
+        colors = range(len(x))
+
+        plt.scatter(x, y, c=colors)
+
+        if neighbor_radius:
+            for x, y in zip(x, y):
+                c = Circle((x, y), self.neighbor_radius, color='r',
+                           fill=False)
+                ax.add_artist(c)
