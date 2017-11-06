@@ -268,7 +268,7 @@ class SpikeTrainExplorer(object):
         ax = plt if ax is None else ax
 
         groups = self.close_templates(group_id, k)
-        self.plot_templates(groups, ax=ax, sharex=sharex, sharey=sharex)
+        self.plot_templates(groups, ax=ax, sharex=sharex, sharey=sharey)
 
     def plot_all_clusters(self, k, mode='LDA', sample=None, ax=None,
                           sharex=True, sharey=False):
