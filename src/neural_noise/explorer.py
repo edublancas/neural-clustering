@@ -82,19 +82,20 @@ class SpikeTrainExplorer(object):
 
         return reduced
 
-    def scores_for_groups(self, group_ids, flatten=True):
+    @ensure_iterator('group_ids')
+    def scores_for_groups(self, group_ids, channels, flatten=True):
         """Get scores for one or more groups
 
         Parameters
         ----------
         group_id: int or list
             The id for one or more group
+        channels: list
+            Which channels to return
         flatten: bool, optional
             Flatten scores along channels, defaults to True
         """
-        group_ids = group_ids if _is_iter(group_ids) else [group_ids]
-
-        waveforms = [self.waveforms_for_group(g) for g in group_ids]
+        waveforms = [self.waveforms_for_group(g, channels) for g in group_ids]
         lengths = np.hstack([np.ones(w.shape[0])*g for g, w in zip(group_ids,
                                                                    waveforms)])
 
@@ -146,8 +147,8 @@ class SpikeTrainExplorer(object):
         """
         return self.templates[:, :, group_id]
 
-    def waveforms_for_group(self, group_id):
-        """Get the waveforms around a group
+    def waveforms_for_group(self, group_id, channels):
+        """Get the waveforms for a group in selected channels
 
         Parameters
         ----------
@@ -157,12 +158,9 @@ class SpikeTrainExplorer(object):
         # get all spike times that form this group
         times = self.times_for_group(group_id)
 
-        # find main channel
-        main = self.main_channel_for_group(group_id)
-
-        # get waveforms around the group
-        around = self.recording_explorer.read_waveform_around_channel
-        return np.stack([around(t, main) for t in times])
+        # get waveforms in selected channels
+        read_wf = self.recording_explorer.read_waveform
+        return np.stack([read_wf(t, channels) for t in times])
 
     def close_templates(self, group_id, k):
         """return K similar templates
@@ -197,13 +195,13 @@ class SpikeTrainExplorer(object):
         group_ids = group_ids if _is_iter(group_ids) else [group_ids]
         _make_grid_plot(self._plot_template, group_ids, ax, sharex, sharey)
 
-    def plot_pca(self, group_ids, sample=None, ax=None):
+    def plot_pca(self, group_ids, channels, sample=None, ax=None):
         """
         Reduce dimensionality using PCA and plot data
         """
         ax = ax if ax else plt
 
-        scores, labels = self.scores_for_groups(group_ids)
+        scores, labels = self.scores_for_groups(group_ids, channels)
 
         pca = PCA(n_components=2)
         reduced = pca.fit_transform(scores)
@@ -220,13 +218,13 @@ class SpikeTrainExplorer(object):
 
         ax.legend()
 
-    def plot_lda(self, group_ids, sample=None, ax=None):
+    def plot_lda(self, group_ids, channels, sample=None, ax=None):
         """
         Reduce dimensionality using LDA and plot data
         """
         ax = plt if ax is None else ax
 
-        scores, labels = self.scores_for_groups(group_ids)
+        scores, labels = self.scores_for_groups(group_ids, channels)
 
         lda = LDA(n_components=2)
         reduced = lda.fit_transform(scores, labels)
@@ -249,12 +247,16 @@ class SpikeTrainExplorer(object):
         """
         ax = plt if ax is None else ax
 
+        # get similar templates to template with id group_id
         groups = self.close_templates(group_id, k)
 
+        # get the neighbors for the main channel in group_id
+        neighbors = self.recording_explorer.neighbors_for_channel(group_id)
+
         if mode == 'LDA':
-            self.plot_lda(groups, sample=sample, ax=ax)
+            self.plot_lda(groups, neighbors, sample=sample, ax=ax)
         elif mode == 'PCA':
-            self.plot_pca(groups, sample=sample, ax=ax)
+            self.plot_pca(groups, neighbors, sample=sample, ax=ax)
         else:
             raise ValueError('Only PCA and LDA modes are supported')
 
@@ -293,7 +295,7 @@ class SpikeTrainExplorer(object):
         main_channel = self.main_channel_for_group(group_id)
 
         return dict(id=group_id, range=range_, max=max_, min=min_,
-                    main_channel=main_channel, )
+                    main_channel=main_channel)
 
     @ensure_iterator('group_ids')
     def stats_for_groups(self, group_ids):
