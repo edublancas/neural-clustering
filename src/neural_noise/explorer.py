@@ -6,8 +6,10 @@ import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 import matplotlib.pyplot as plt
-
 from yass import geometry
+
+from .util import ensure_iterator
+from .table import Table
 
 
 def _is_iter(obj):
@@ -18,6 +20,7 @@ def _grid_size(group_ids):
     sq = sqrt(len(group_ids))
     cols = floor(sq)
     rows = ceil(sq)
+    rows = rows + 1 if rows * cols < len(group_ids) else rows
     return rows, cols
 
 
@@ -273,6 +276,39 @@ class SpikeTrainExplorer(object):
                      sample=sample)
 
         _make_grid_plot(fn, self.all_ids, ax, sharex, sharey)
+
+    def _stats_for_group(self, group_id):
+        """Return some summary statistics for a single group
+
+        Returns
+        -------
+        dict
+            Dict with id, range, max, min and main channel for the selected
+            group
+        """
+        template = self.template_for_group(group_id)
+        max_ = np.max(template)
+        min_ = np.min(template)
+        range_ = max_ - min_
+        main_channel = self.main_channel_for_group(group_id)
+
+        return dict(id=group_id, range=range_, max=max_, min=min_,
+                    main_channel=main_channel, )
+
+    @ensure_iterator('group_ids')
+    def stats_for_groups(self, group_ids):
+        """Return some summary statistics for certain groups
+        """
+        stats = [self._stats_for_group(g) for g in group_ids]
+        content = [s.values() for s in stats]
+        header = stats[0].keys()
+        return Table(content=content, header=header)
+
+    def stats_for_closest_groups_to(self, group_id, k):
+        """Return some summary statistics a given group and its k neighbors
+        """
+        groups = self.close_templates(group_id, k)
+        return self.stats_for_groups(groups)
 
 
 class RecordingExplorer(object):

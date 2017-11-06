@@ -5,6 +5,7 @@ jupyter
 matplotlib
 # yass
 # tensorflow
+tabulate
 
 # doc
 sphinx
