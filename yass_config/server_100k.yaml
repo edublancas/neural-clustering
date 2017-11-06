@@ -1,13 +1,10 @@
-# SAMPLE CONFIGURATION FILE
-
 # DATA FILES
 # data root folder
-root: /ssd/data/peter/ej49_dataset
-#root: /Users/Edu/data/yass
+root: /ssd/data/eduardo
 # binary recording filename
-filename: ej49_data1_set1.bin
+filename: sample_100k.bin
 # channel geometry file name
-geomFile: ej49_geometry1.txt
+geomFile: geometry.txt
 # save spikeTrain
 spikeTrainName: ej49_spikeTrain1_1.csv
 
