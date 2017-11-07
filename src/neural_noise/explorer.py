@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 from yass import geometry
 
-from .util import ensure_iterator
+from .util import ensure_iterator, sample
 from .table import Table
 
 
@@ -409,10 +409,13 @@ class RecordingExplorer(object):
                            fill=False)
                 ax.add_artist(c)
 
-    def plot_clusters(self, times, ax=None):
+    def plot_clusters(self, times, sample_percentage=None, ax=None):
         """
         """
         ax = ax if ax else plt.gca()
+
+        if sample_percentage:
+            times = sample(times, sample_percentage)
 
         wfs = self.read_waveforms(times, flatten=True)
 

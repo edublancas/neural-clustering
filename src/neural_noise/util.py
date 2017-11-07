@@ -6,6 +6,8 @@ import inspect
 from copy import copy
 from functools import wraps
 
+import numpy as np
+
 
 def _map_parameters_in_fn_call(args, kwargs, func):
     """
@@ -111,3 +113,10 @@ def ensure_iterator(param):
         return wrapper
 
     return _ensure_repeated
+
+
+def sample(data, percentage):
+    """Sample array
+    """
+    return np.random.choice(data, size=int(percentage*len(data)),
+                            replace=False)
