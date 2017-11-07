@@ -1,7 +1,6 @@
-"""
-Process pipeline: triage (optional) coreset (optional), masking, clustering,
-getting templates and cleaning
-"""
+%load_ext autoreload
+%autoreload 2
+
 import os
 import logging
 import datetime
@@ -17,8 +16,25 @@ from yass.process.templates import get_templates
 import numpy as np
 from neural_noise import config
 
-CONFIG = Config.from_yaml('yass_config/server_49ch.yaml')
-cfg = config.load('server_config.yaml')
+
+logging.basicConfig(level=logging.INFO)
+
+
+# once you have mask and score from the pipeline calculate xbar as follows
+# xbar_{nc} = x_{nc} with probability m_{nc} and N(0, I) with
+# probability 1-m_{nc}. Here n is the index of the datapoint anc c is
+# the index of the channel and x is the score (N x 3 x C ndarray).
+
+# Flatten out the score array so you'll have N x (3xC) array and then
+# you can use whichever clustering algorithm you want
+
+# server
+# CONFIG = Config.from_yaml('yass_config/server_49ch.yaml')
+# cfg = config.load('server_config.yaml')
+
+# local
+CONFIG = Config.from_yaml('yass_config/local_49ch.yaml')
+cfg = config.load('config.yaml')
 
 
 # load data generated from yass
@@ -27,6 +43,15 @@ files = ['score', 'clear_index', 'spike_times', 'spike_train', 'spike_left', 'te
 (score, clear_index,
  spike_times, spike_train,
  spike_left, templates) = [np.load(os.path.join(cfg['root'], 'yass/{}.npy'.format(f))) for f in  files]
+
+# scores for clear indexes (dim are 3 X C ) C are neighboring channels
+[s.shape for s in score]
+
+# location of clear indexes in spike times
+[s.shape for s in clear_index]
+
+# all sike times (clear and not clear spikes)
+[s.shape for s in spike_times]
 
 startTime = datetime.datetime.now()
 
@@ -46,6 +71,9 @@ if CONFIG.doTriage:
                                 CONFIG.neighChannels, CONFIG.doTriage)
     Time['t'] += (datetime.datetime.now()-_b).total_seconds()
 
+
+[s.shape for s in score]
+
 # FIXME: pipeline will fail if coreset is deactivate as making is using
 # coreset output as input
 
@@ -59,15 +87,22 @@ if CONFIG.doCoreset:
     group = coreset(score, CONFIG.nChan, CONFIG.coresetK, CONFIG.coresetTh)
     Time['c'] += (datetime.datetime.now()-_b).total_seconds()
 
+
+[s.shape for s in group]
+
 ###########
 # Masking #
 ###########
 
 _b = datetime.datetime.now()
 logger.info("Masking...")
+
+# mask weights for every score
 mask = getmask(score, group, CONFIG.maskTh, CONFIG.nFeat, CONFIG.nChan,
                CONFIG.doCoreset)
 Time['m'] += (datetime.datetime.now()-_b).total_seconds()
+
+[s.shape for s in mask]
 
 ##############
 # Clustering #
@@ -75,9 +110,22 @@ Time['m'] += (datetime.datetime.now()-_b).total_seconds()
 
 _b = datetime.datetime.now()
 logger.info("Clustering...")
-spike_train_clear = runSorter(score, mask, clear_index, group,
-                              CONFIG.channelGroups, CONFIG.neighChannels,
-                              CONFIG.nFeat, CONFIG)
+
+
+# spike_train_clear = runSorter(score, mask, clear_index, group,
+#                               CONFIG.channelGroups, CONFIG.neighChannels,
+#                               CONFIG.nFeat, CONFIG)
+
+score, index, mask, group = runSorter(score, mask, clear_index, group,
+          CONFIG.channelGroups, CONFIG.neighChannels,
+          CONFIG.nFeat, CONFIG)
+
+
+len(score)
+len(index)
+len(mask)
+len(group)
+
 Time['s'] += (datetime.datetime.now()-_b).total_seconds()
 
 #################

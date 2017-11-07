@@ -16,7 +16,7 @@ dtype: int16
 # recording rate (in Hz)
 srate: 20000
 # number of channels in the recording
-nChan: 7
+nChan: 49
 # spatial radius of spikes
 spatialRadius: 70
 
