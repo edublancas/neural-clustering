@@ -20,7 +20,7 @@ K = 8
 # dimensionality of data
 D = 2
 # number of MCMC samples
-T = 10000
+T = 1000
 
 
 ##########
@@ -60,6 +60,7 @@ qz = Empirical(tf.Variable(tf.zeros([T, N], dtype=tf.int32)))
 
 inference = ed.Gibbs({pi: qpi, mu: qmu, sigmasq: qsigmasq, z: qz},
                      data={x: x_train})
+
 inference.initialize()
 
 sess = ed.get_session()
