@@ -445,3 +445,13 @@ class RecordingExplorer(object):
         reduced = pca.fit_transform(wfs)
 
         ax.scatter(reduced[:, 0], reduced[:, 1])
+
+    def plot_series(self, from_time, to_time, ax=None):
+        """Plot observations in a selected number of channels
+        """
+        ax = ax if ax else plt
+
+        f, axs = plt.subplots(self.n_channels, 1)
+
+        for ax, ch in zip(axs, range(self.n_channels)):
+            ax.plot(self.data[from_time:to_time, ch])
