@@ -286,6 +286,23 @@ class SpikeTrainExplorer(object):
 
         _make_grid_plot(fn, self.all_ids, ax, sharex, sharey, max_cols)
 
+    def plot_waveforms_and_clusters(self, group_id, ax=None):
+        """
+        """
+        ax = plt if ax is None else ax
+
+        ax1 = plt.subplot2grid((6, 6), (0, 0), colspan=3, rowspan=3)
+        ax2 = plt.subplot2grid((6, 6), (0, 3), colspan=3)
+        ax3 = plt.subplot2grid((6, 6), (1, 3), colspan=3)
+        ax4 = plt.subplot2grid((6, 6), (2, 3), colspan=3)
+
+        self.plot_closest_clusters_to(group_id, k=2, ax=ax1)
+
+        close = self.close_templates(group_id, k=2)
+
+        for ax, template in zip([ax2, ax3, ax4], close):
+            self._plot_template(template, ax=ax)
+
     def _stats_for_group(self, group_id):
         """Return some summary statistics for a single group
 
