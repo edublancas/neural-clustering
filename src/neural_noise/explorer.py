@@ -17,11 +17,16 @@ def _is_iter(obj):
     return isinstance(obj, collections.Iterable)
 
 
-def _grid_size(group_ids):
+def _grid_size(group_ids, max_cols=None):
     sq = sqrt(len(group_ids))
     cols = floor(sq)
     rows = ceil(sq)
     rows = rows + 1 if rows * cols < len(group_ids) else rows
+
+    if max_cols and cols > max_cols:
+        rows = rows + max_cols - cols
+        cols = max_cols
+
     return rows, cols
 
 
@@ -272,9 +277,9 @@ class SpikeTrainExplorer(object):
         self.plot_templates(groups, ax=ax, sharex=sharex, sharey=sharey)
 
     def plot_all_clusters(self, k, mode='LDA', sample=None, ax=None,
-                          sharex=True, sharey=False):
+                          sharex=True, sharey=False, max_cols=None):
         ax = plt if ax is None else ax
-        rows, cols = _grid_size(self.all_ids)
+        rows, cols = _grid_size(self.all_ids, max_cols)
 
         fn = partial(self.plot_closest_clusters_to, k=k, mode=mode,
                      sample=sample)
