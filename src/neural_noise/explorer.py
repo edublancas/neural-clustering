@@ -349,6 +349,19 @@ class RecordingExplorer(object):
 
         return self.data[start:end, channels]
 
+    def read_waveforms(self, times, channels='all', flatten=False):
+        """Read waveforms at certain times
+        """
+        if isinstance(channels, str) and channels == 'all':
+            channels = range(self.n_channels)
+
+        wfs = np.stack([self.read_waveform(t, channels) for t in times])
+
+        if flatten:
+            wfs = wfs.reshape(wfs.shape[0], -1)
+
+        return wfs
+
     def read_waveform_around_channel(self, time, channel):
         return self.read_waveform(time,
                                   channels=self.neighbors_for_channel(channel))
@@ -395,3 +408,15 @@ class RecordingExplorer(object):
                 c = Circle((x, y), self.neighbor_radius, color='r',
                            fill=False)
                 ax.add_artist(c)
+
+    def plot_clusters(self, times, ax=None):
+        """
+        """
+        ax = ax if ax else plt.gca()
+
+        wfs = self.read_waveforms(times, flatten=True)
+
+        pca = PCA(n_components=2)
+        reduced = pca.fit_transform(wfs)
+
+        ax.scatter(reduced[:, 0], reduced[:, 1])
