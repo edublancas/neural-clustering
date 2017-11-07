@@ -18,13 +18,14 @@ def _is_iter(obj):
 
 
 def _grid_size(group_ids, max_cols=None):
-    sq = sqrt(len(group_ids))
+    total = len(group_ids)
+    sq = sqrt(total)
     cols = floor(sq)
     rows = ceil(sq)
     rows = rows + 1 if rows * cols < len(group_ids) else rows
 
     if max_cols and cols > max_cols:
-        rows = rows + max_cols - cols
+        rows = ceil(total/max_cols)
         cols = max_cols
 
     return rows, cols
