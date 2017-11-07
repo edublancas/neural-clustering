@@ -4,7 +4,7 @@ Truncated DPMM
 from .util import stick_breaking
 
 
-from edward.models import (Normal, MultivariateNormalDiag, Categorical, Beta,
+from edward.models import (Normal, MultivariateNormalDiag, Beta,
                            InverseGamma,  ParamMixture, Empirical)
 import edward as ed
 import tensorflow as tf
@@ -19,8 +19,8 @@ cfg = config.load('config.yaml')
 x_train = np.load(os.path.join(cfg['root'], 'training.npy'))
 x_train.shape
 
-truncation_level = 20
-simulation_samples = 10000
+truncation_level = 10
+simulation_samples = 1000
 
 
 def DPMM(x_train, truncation_level, simulation_samples):

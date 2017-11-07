@@ -10,7 +10,6 @@ import tensorflow as tf
 
 
 from matplotlib import pyplot as plt
-import matplotlib.cm as cm
 
 
 def build_toy_dataset(N):
@@ -30,17 +29,16 @@ def stick_breaking(v):
     return v * remaining_pieces
 
 
-ed.set_seed(0)
+# ed.set_seed(0)
 
-N = 500
+N = 2000
 D = 2
-T = K = 10  # truncation level in DP
+T = K = 5  # truncation level in DP
 
 x_train = build_toy_dataset(N)
-# plt.scatter(x_train[:, 0], x_train[:, 1])
-# plt.axis([-3, 3, -3, 3])
-# plt.title("Data")
-# plt.show()
+
+plt.scatter(x_train[:, 0], x_train[:, 1])
+plt.show()
 
 
 # Model
@@ -79,23 +77,28 @@ x = ParamMixture(pi, {'loc': mu, 'scale_diag': sigmasq},
 
 
 # number of samples
-S = 40000
+S = 10000
 
 qmu = Empirical(tf.Variable(tf.zeros([S, K, D])))
+qsigmasq = Empirical(tf.Variable(tf.zeros([S, K, D])))
+
 qbeta = Empirical(tf.Variable(tf.zeros([S, K])))
 
 # doesnt work - KeyError
-inference = ed.SGHMC({beta: qbeta, mu: qmu}, data={x: x_train})
+# inference = ed.SGHMC({beta: qbeta, mu: qmu}, data={x: x_train})
 # doesnt work - NotImplementedError
-inference = ed.Gibbs({beta: qbeta, mu: qmu}, data={x: x_train})
+# inference = ed.Gibbs({beta: qbeta, mu: qmu}, data={x: x_train})
 
 # works
-inference = ed.HMC({beta: qbeta, mu: qmu}, data={x: x_train})
-inference = ed.SGLD({beta: qbeta, mu: qmu}, data={x: x_train})
+# added  sigmasq
+inference = ed.HMC({beta: qbeta, mu: qmu}, #sigmasq: qsigmasq},
+                   data={x: x_train})
+
+# also works but empirically HMC works better...
+# inference = ed.SGLD({beta: qbeta, mu: qmu}, data={x: x_train})
 
 
 inference.initialize()
-
 
 sess = ed.get_session()
 init = tf.global_variables_initializer()
@@ -108,23 +111,25 @@ for _ in range(inference.n_iter):
 
     t = info_dict['t']
 
-    if t % inference.n_print == 0:
-        print("Inferred cluster means:")
-        print(sess.run(qmu.mean()))
+    # if t % inference.n_print == 0:
+    #     print("Inferred cluster means:")
+    #     print(sess.run(qmu.mean()))
 
 # Criticism
 # Calculate likelihood for each data point and cluster assignment,
 # averaged over many posterior samples. ``x_post`` has shape (N, 100, K, D).
 SC = 1000
 
+# each qmu is the mu vector for each component (?)
 mu_sample = qmu.sample(SC)
+# sigmasq_sample = qsigmasq.sample(SC)
 
 x_post = Normal(tf.ones([N, 1, 1, 1]) * mu_sample,
-                tf.ones([N, 1, 1, 1]) * 0.1)
+                tf.ones([N, 1, 1, 1]) * 0.1) # tf.sqrt(sigmasq_sample)
 
 x_broadcasted = tf.tile(tf.reshape(x_train, [N, 1, 1, D]), [1, SC, K, 1])
 # is it okay to do this?
-x_broadcasted = tf.to_float(x_broadcasted)
+# x_broadcasted = tf.to_float(x_broadcasted)
 
 # Sum over latent dimension, then average over posterior samples.
 # ``log_liks`` ends up with shape (N, K).
@@ -137,7 +142,7 @@ clusters = tf.argmax(log_liks, 1).eval()
 
 print('Found {} clusters'.format(len(np.unique(clusters))))
 
-plt.scatter(x_train[:, 0], x_train[:, 1], c=clusters, cmap=cm.bwr)
+plt.scatter(x_train[:, 0], x_train[:, 1], c=clusters)
 plt.axis([-3, 3, -3, 3])
 plt.title("Predicted cluster assignments")
 plt.show()
