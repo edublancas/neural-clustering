@@ -293,8 +293,8 @@ class SpikeTrainExplorer(object):
 
         ax1 = plt.subplot2grid((6, 6), (0, 0), colspan=3, rowspan=3)
         ax2 = plt.subplot2grid((6, 6), (0, 3), colspan=3)
-        ax3 = plt.subplot2grid((6, 6), (1, 3), colspan=3, sharex=ax2)
-        ax4 = plt.subplot2grid((6, 6), (2, 3), colspan=3, sharex=ax3)
+        ax3 = plt.subplot2grid((6, 6), (1, 3), colspan=3, sharey=ax2)
+        ax4 = plt.subplot2grid((6, 6), (2, 3), colspan=3, sharey=ax3)
 
         self.plot_closest_clusters_to(group_id, k=2, ax=ax1)
 
