@@ -118,10 +118,13 @@ for _ in range(inference.n_iter):
 SC = 1000
 
 mu_sample = qmu.sample(SC)
+
 x_post = Normal(tf.ones([N, 1, 1, 1]) * mu_sample,
                 tf.ones([N, 1, 1, 1]) * 0.1)
 
 x_broadcasted = tf.tile(tf.reshape(x_train, [N, 1, 1, D]), [1, SC, K, 1])
+# is it okay to do this?
+x_broadcasted = tf.to_float(x_broadcasted)
 
 # Sum over latent dimension, then average over posterior samples.
 # ``log_liks`` ends up with shape (N, K).
