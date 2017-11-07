@@ -31,7 +31,7 @@ def _grid_size(group_ids, max_cols=None):
     return rows, cols
 
 
-def _make_grid_plot(fn, group_ids, ax, sharex, sharey, max_cols):
+def _make_grid_plot(fn, group_ids, ax, sharex, sharey, max_cols=None):
     rows, cols = _grid_size(group_ids, max_cols)
 
     f, axs = ax.subplots(rows, cols, sharex=sharex, sharey=sharey)
