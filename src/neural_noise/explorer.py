@@ -31,8 +31,8 @@ def _grid_size(group_ids, max_cols=None):
     return rows, cols
 
 
-def _make_grid_plot(fn, group_ids, ax, sharex, sharey):
-    rows, cols = _grid_size(group_ids)
+def _make_grid_plot(fn, group_ids, ax, sharex, sharey, max_cols):
+    rows, cols = _grid_size(group_ids, max_cols)
 
     f, axs = ax.subplots(rows, cols, sharex=sharex, sharey=sharey)
 
@@ -280,12 +280,11 @@ class SpikeTrainExplorer(object):
     def plot_all_clusters(self, k, mode='LDA', sample=None, ax=None,
                           sharex=True, sharey=False, max_cols=None):
         ax = plt if ax is None else ax
-        rows, cols = _grid_size(self.all_ids, max_cols)
 
         fn = partial(self.plot_closest_clusters_to, k=k, mode=mode,
                      sample=sample)
 
-        _make_grid_plot(fn, self.all_ids, ax, sharex, sharey)
+        _make_grid_plot(fn, self.all_ids, ax, sharex, sharey, max_cols)
 
     def _stats_for_group(self, group_id):
         """Return some summary statistics for a single group
