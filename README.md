@@ -37,6 +37,7 @@ pytest --flake8
 Counting jupyter notebooks length:
 
 ```
+./count
 ```
 
 ## Step 1: Run YASS pipeline
