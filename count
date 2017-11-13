@@ -1,12 +1,19 @@
+#!/usr/bin/env bash
+
 # strip notebooks
+echo 'Stripping notebooks...'
 ./strip_nb notebooks/1-intro.ipynb
 ./strip_nb notebooks/2-data-loading.ipynb
+./strip_nb notebooks/3-dpmm-v1.ipynb
+./strip_nb notebooks/4-criticism.ipynb
 
 # convert notebooks to md
+echo 'Converting notebooks to markdown...'
 jupyter-nbconvert --to markdown notebooks/1-intro.ipynb
 jupyter-nbconvert --to markdown notebooks/2-data-loading.ipynb
 jupyter-nbconvert --to markdown notebooks/3-dpmm-v1.ipynb
 jupyter-nbconvert --to markdown notebooks/4-criticism.ipynb
 
 # count words
+echo 'Word count:'
 wc -w notebooks/1-intro.md notebooks/2-data-loading.md notebooks/3-dpmm-v1.md notebooks/4-criticism.md
