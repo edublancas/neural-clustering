@@ -1,4 +1,6 @@
-# https://gist.github.com/minrk/6176788
+# strip notebooks
+./strip_nb notebooks/1-intro.ipynb
+./strip_nb notebooks/2-data-loading.ipynb
 
 # convert notebooks to md
 jupyter-nbconvert --to markdown notebooks/1-intro.ipynb
