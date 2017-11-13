@@ -33,11 +33,18 @@ def stick_breaking(v):
 
 # ed.set_seed(0)
 
+# toy data
 N = 500
 D = 2
 T = K = 15  # truncation level in DP
 
 x_train = build_toy_dataset(N)
+
+
+# data subset
+N, D = x_train.shape
+T = K = 15  # truncation level in DP
+
 
 plt.scatter(x_train[:, 0], x_train[:, 1])
 plt.show()
@@ -81,16 +88,16 @@ x = ParamMixture(pi, {'loc': mu, 'scale_diag': sigmasq},
 
 # find the parameters for each mixture model component
 # qmu = Normal(tf.Variable(tf.random_normal([K, D])),
-# tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))))
+#              tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))))
 
 # qbeta = Beta(tf.nn.softplus(tf.Variable(tf.random_normal([T]))),
 #              tf.nn.softplus(tf.Variable(tf.random_normal([T]))))
 
 # inference = ed.KLqp({beta: qbeta, mu: qmu}, data={x: x_train})
-#
+
 
 # number of samples
-S = 50000
+S = 100000
 
 qmu = Empirical(tf.Variable(tf.zeros([S, K, D])))
 qbeta = Empirical(tf.Variable(tf.zeros([S, K])))
@@ -99,13 +106,13 @@ qbeta = Empirical(tf.Variable(tf.zeros([S, K])))
 # https://github.com/blei-lab/edward/issues/408
 # http://edwardlib.org/api/ed/HMC
 inference = ed.HMC({beta: qbeta, mu: qmu}, data={x: x_train})
-# inference.initialize(n_steps=5)
+inference.initialize(step_size=0.1, n_steps=3)
 
 # http://edwardlib.org/api/ed/SGLD
 # inference = ed.SGLD({beta: qbeta, mu: qmu}, data={x: x_train})
 
 
-inference.initialize(step_size=0.1)
+# inference.initialize(step_size=0.1)
 
 
 sess = ed.get_session()

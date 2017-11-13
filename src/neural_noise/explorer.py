@@ -415,7 +415,8 @@ class RecordingExplorer(object):
                                   channels=self.neighbors_for_channel(channel),
                                   ax=ax, line_at_t=line_at_t, overlay=overlay)
 
-    def plot_geometry(self, neighbor_radius=False, ax=None):
+    def plot_geometry(self, channel_label=True, neighbor_radius=False,
+                      ax=None):
         """Plot geometry file
         """
         ax = ax if ax else plt.gca()
@@ -424,6 +425,10 @@ class RecordingExplorer(object):
         colors = range(len(x))
 
         plt.scatter(x, y, c=colors)
+
+        if channel_label:
+            for x, y, i in zip(x, y, range(self.n_channels)):
+                ax.text(x, y, i, fontsize=15)
 
         if neighbor_radius:
             for x, y in zip(x, y):
