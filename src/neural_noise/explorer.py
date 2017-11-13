@@ -6,6 +6,7 @@ import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
 from matplotlib.patches import Circle
 from yass import geometry
 
@@ -458,5 +459,10 @@ class RecordingExplorer(object):
 
         f, axs = plt.subplots(self.n_channels, 1)
 
+        formatter = FuncFormatter(lambda x, pos: from_time + int(x))
+
         for ax, ch in zip(axs, range(self.n_channels)):
             ax.plot(self.data[from_time:to_time, ch])
+            ax.set_title('Channel {}'.format(ch), fontsize=40)
+            ax.xaxis.set_major_formatter(formatter)
+            ax.tick_params(axis='x', which='major', labelsize=25)
