@@ -1,4 +1,4 @@
-# neural-noise
+# Neural clustering project
 
 Neural noise project
 
