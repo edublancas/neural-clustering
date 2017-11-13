@@ -13,7 +13,7 @@ from shutil import rmtree
 
 from setuptools import find_packages, Command, setup
 
-NAME = 'Neural noise'
+NAME = 'neural-clustering'
 DESCRIPTION = 'Modeling noise from multielectrode array readings'
 URL = 'https://github.com/edublancas/neural-noise'
 EMAIL = 'e.blancas@columbia.edu'
