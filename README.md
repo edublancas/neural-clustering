@@ -26,6 +26,19 @@ pip install .
 pip install -r requirements.txt
 ```
 
+## Step 0: Code linting and notebooks length
+
+Checking code passes flake8:
+
+```shell
+pytest --flake8
+```
+
+Counting jupyter notebooks length:
+
+```
+```
+
 ## Step 1: Run YASS pipeline
 
 The first step is to run YASS to generate the necessary

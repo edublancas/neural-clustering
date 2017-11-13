@@ -6,3 +6,7 @@ matplotlib
 # yass
 # tensorflow
 tabulate
+
+
+# flake8
+pytest-flake8
