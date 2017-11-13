@@ -17,3 +17,6 @@ jupyter-nbconvert --to markdown notebooks/4-criticism.ipynb
 # count words
 echo 'Word count:'
 wc -w notebooks/1-intro.md notebooks/2-data-loading.md notebooks/3-dpmm-v1.md notebooks/4-criticism.md
+
+echo 'Removing md files...'
+rm -f 1-intro.md 2-data-loading.md 3-dpmm-v1.md 4-criticism.md
