@@ -6,7 +6,3 @@ matplotlib
 # yass
 # tensorflow
 tabulate
-
-# doc
-sphinx
-sphinxcontrib-blockdiag
