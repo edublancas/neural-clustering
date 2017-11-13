@@ -27,7 +27,7 @@ pip install -r requirements.txt
 
 ```shell
 # run yass pipeline to process neural data
-run_yass yass_config/local_100k.yaml config.yaml
+run_yass yass_config/local_7ch.yaml config.yaml
 ```
 
 
