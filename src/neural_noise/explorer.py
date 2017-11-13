@@ -397,6 +397,7 @@ class RecordingExplorer(object):
         ax = ax if ax else plt
 
         n_channels = len(channels)
+        formatter = FuncFormatter(lambda x, pos: time + int(x))
 
         if overlay:
             axs = [ax] * n_channels
@@ -406,9 +407,14 @@ class RecordingExplorer(object):
         for ch, ax in zip(channels, axs):
             waveform = self.read_waveform(time, ch)
             ax.plot(waveform)
+            ax.set_title('Channel {}'.format(ch), fontsize=12)
+            ax.xaxis.set_major_formatter(formatter)
+            ax.tick_params(axis='x', which='major', labelsize=10)
 
             # if line_at_t:
             #     ax.axvline(x=time + 1)
+
+        plt.tight_layout()
 
     def plot_waveform_around_channel(self, time, channel, ax=None,
                                      line_at_t=False, overlay=False):
