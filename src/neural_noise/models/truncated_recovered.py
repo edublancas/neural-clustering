@@ -158,6 +158,8 @@ x_post = Normal(tf.ones([N, 1, 1, 1]) * mu_sample,
                 tf.ones([N, 1, 1, 1]) * 1.0)
 
 x_broadcasted = tf.tile(tf.reshape(x_train, [N, 1, 1, D]), [1, SC, K, 1])
+# is it ok to convert like this?
+x_broadcasted = tf.to_float(x_broadcasted)
 
 # Sum over latent dimension, then average over posterior samples.
 # ``log_liks`` ends up with shape (N, K).
@@ -166,8 +168,8 @@ log_liks = tf.reduce_sum(log_liks, 3)
 log_liks = tf.reduce_mean(log_liks, 1)
 
 # Choose the cluster with the highest likelihood for each data point.
-clusters = tf.argmax(log_liks, 1).eval()
-
+# clusters = tf.argmax(log_liks, 1).eval()
+clusters = np.argmax(log_liks, 1)
 
 print('found {} clusters'.format(len(np.unique(clusters))))
 
