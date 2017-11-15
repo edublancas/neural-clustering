@@ -185,6 +185,7 @@ sns.jointplot(x_original[:, 0], x_original[:, 1], kind='kde')
 plt.show()
 
 # sample from post predictive disttribution
+# this doesnt look right...
 x_pred = ed.copy(x, {pi: qpi, mu: qmu, sigmasq: qsigmasq, z: qz})
 x_pred_sample = x_pred.sample(500).eval()
 sns.jointplot(x_pred_sample[:, 0], x_pred_sample[:, 1], kind='kde')
@@ -194,8 +195,16 @@ plt.show()
 ed.evaluate('log_likelihood', data={x_pred: x_train})
 
 # ppc
+y_rep, y = ed.ppc(lambda xs, mus: tf.reduce_mean(xs[x]),
+                  data={x: x_train},
+                  n_samples=1000)
+
 y_rep, y = ed.ppc(lambda xs, mus: tf.reduce_mean(xs[x_pred]),
                   data={x_pred: x_train},
+                  n_samples=1000)
+
+y_rep, y = ed.ppc(lambda xs, mus: tf.reduce_mean(xs[x_]),
+                  data={x_: x_train},
                   n_samples=1000)
 
 ed.ppc_stat_hist_plot(y[0], y_rep,
