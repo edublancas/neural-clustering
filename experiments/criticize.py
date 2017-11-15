@@ -48,5 +48,3 @@ plt.show()
 ed.ppc_density_plot(y, y_rep)
 plt.show()
 
-# TODO: plot params values at eveery training iteration
-

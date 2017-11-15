@@ -47,6 +47,7 @@ x_train = build_toy_dataset(N)
 
 # plot toy dataset
 plt.scatter(x_train[:, 0], x_train[:, 1])
+sns.jointplot(x_train[:, 0], x_train[:, 1], kind='kde')
 plt.show()
 
 
@@ -69,6 +70,8 @@ z = x.cat
 # Inference #
 #############
 
+# turorial http://edwardlib.org/tutorials/inference
+# api http://edwardlib.org/api/inference
 
 qpi = Empirical(tf.Variable(tf.ones([T, K]) / K))
 qmu = Empirical(tf.Variable(tf.zeros([T, K, D])))
@@ -102,6 +105,8 @@ for _ in range(inference.n_iter):
 # Criticism #
 #############
 
+# tutorial on criticism: http://edwardlib.org/tutorials/criticism
+
 SC = 200
 
 mu_sample = qmu.sample(SC)
@@ -119,6 +124,25 @@ clusters = tf.argmax(log_liks, 1).eval()
 plt.scatter(x_train[:, 0], x_train[:, 1], c=clusters)
 plt.title("Predicted cluster assignments")
 plt.show()
+
+# Esimate parameters and draw from the model
+
+# estimate cluster means
+mus = np.mean(qmu.sample(1000).eval(), axis=0)
+
+# estimate cluster stds
+stds = np.sqrt(np.mean(qsigmasq.sample(1000).eval(), axis=0))
+
+# estimate proportions
+pis = np.mean(qpi.sample(1000).eval(), axis=0)
+
+x_ = ParamMixture(pis, {'loc': mus, 'scale_diag': stds},
+                  MultivariateNormalDiag,
+                  sample_shape=N)
+sample = x_.sample(500).eval()
+sns.jointplot(sample[:, 0], sample[:, 1], kind='kde')
+plt.show()
+
 
 # plotting pis
 # https://seaborn.pydata.org/tutorial/distributions.html
@@ -160,7 +184,7 @@ x_original = x.sample(500).eval()
 sns.jointplot(x_original[:, 0], x_original[:, 1], kind='kde')
 plt.show()
 
-# sample from mixture model with learned parameters
+# sample from post predictive disttribution
 x_pred = ed.copy(x, {pi: qpi, mu: qmu, sigmasq: qsigmasq, z: qz})
 x_pred_sample = x_pred.sample(500).eval()
 sns.jointplot(x_pred_sample[:, 0], x_pred_sample[:, 1], kind='kde')
@@ -178,3 +202,6 @@ ed.ppc_stat_hist_plot(y[0], y_rep,
                       stat_name=r'$T \equiv$mean', bins=10)
 
 plt.show()
+
+
+# TODO: plot params values at eveery training iteration
