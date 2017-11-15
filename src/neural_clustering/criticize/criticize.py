@@ -2,7 +2,7 @@ import tensorflow as tf
 from edward.models import Normal
 
 
-def find_cluster_assigments(x_train, qmu, params):
+def find_cluster_assignments(x_train, qmu, params):
     """Find cluster assignments
     """
     N, D = x_train.shape
