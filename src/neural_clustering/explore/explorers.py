@@ -182,7 +182,7 @@ class SpikeTrainExplorer(object):
     def _plot_template(self, group_id, ax=None):
         """Plot a single template
         """
-        ax = ax if ax else plt
+        ax = ax if ax else plt.gca()
         template = self.template_for_group(group_id)
         ax.plot(template.T)
         ax.set_title('Template {}'.format(group_id))
