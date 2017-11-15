@@ -10,6 +10,7 @@ import edward as ed
 from edward.models import (Dirichlet, InverseGamma, MultivariateNormalDiag,
                            Normal, ParamMixture, Empirical)
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 ed.set_seed(0)
@@ -119,8 +120,47 @@ plt.scatter(x_train[:, 0], x_train[:, 1], c=clusters)
 plt.title("Predicted cluster assignments")
 plt.show()
 
+# plotting pis
+# https://seaborn.pydata.org/tutorial/distributions.html
+pi_sample = pi.sample(5000).eval()
+qpi_sample = qpi.sample(5000).eval()
+
+sns.distplot(pi_sample[:, 0])
+plt.show()
+
+sns.distplot(qpi_sample[:, 0])
+plt.show()
+
+
+sns.distplot(pi_sample[:, 1])
+plt.show()
+
+sns.distplot(qpi_sample[:, 1])
+plt.show()
+
+# plottng mus
+mu_sample = mu.sample(5000).eval()
+qmu_sample = qmu.sample(5000).eval()
+
+sns.distplot(mu_sample[:, 0])
+plt.show()
+
+# get obsevations from mixture component means
+first = qmu_sample[:, 0, :]
+second = qmu_sample[:, 1, :]
+
+sns.jointplot(first[:, 0], first[:, 1])
+plt.show()
+
+sns.jointplot(second[:, 0], second[:, 1])
+plt.show()
 
 x_pred = ed.copy(x, {pi: qpi, mu: qmu, sigmasq: qsigmasq, z: qz})
+
+
+x_pred_sample = x_pred.sample(500).eval()
+plt.scatter(x_pred_sample[:, 0], x_pred_sample[:, 1])
+plt.show()
 
 # log-likelihood performance
 ed.evaluate('log_likelihood', data={x_pred: x_train})
