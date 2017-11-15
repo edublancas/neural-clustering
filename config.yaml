@@ -1,1 +1,2 @@
-root: ~/data/noise
+# root: ~/data/noise
+root: ~/data/neural-clustering-toy

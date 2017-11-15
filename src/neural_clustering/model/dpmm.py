@@ -53,3 +53,5 @@ def fit(x_train, truncation_level, cfg):
 
     output_path = os.path.join(directory, 'session.ckpt')
     saver.save(sess, output_path)
+
+    # TODO: save other parameters needed for session restore
