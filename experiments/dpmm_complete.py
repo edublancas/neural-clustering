@@ -196,10 +196,6 @@ np.unique(clusters, return_counts=True)
 
 np.save(os.path.join(directory, 'clusters.npy'), clusters)
 
-# need to check how to plot this stuff....
-plt.scatter(x_train[:, 0], x_train[:, 1], c=clusters)
-plt.title("Predicted cluster assignments")
-plt.show()
 
 plt.plot(qbeta.params.eval())
 plt.show()
