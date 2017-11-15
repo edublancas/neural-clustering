@@ -155,9 +155,13 @@ plt.show()
 sns.jointplot(second[:, 0], second[:, 1])
 plt.show()
 
+# sample from mixture model with prior parameters
+x_original = x.sample(500).eval()
+plt.scatter(x_original[:, 0], x_original[:, 1])
+plt.show()
+
+# sample from mixture model with learned parameters
 x_pred = ed.copy(x, {pi: qpi, mu: qmu, sigmasq: qsigmasq, z: qz})
-
-
 x_pred_sample = x_pred.sample(500).eval()
 plt.scatter(x_pred_sample[:, 0], x_pred_sample[:, 1])
 plt.show()
