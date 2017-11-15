@@ -2,11 +2,11 @@ import tensorflow as tf
 from edward.models import Normal
 
 
-def find_cluster_assigments(x_train, qmu, truncation_level):
+def find_cluster_assigments(x_train, qmu, params):
     """Find cluster assignments
     """
     N, D = x_train.shape
-    K = truncation_level
+    K = params['truncation_level']
 
     # http://edwardlib.org/api/ed/MonteCarlo
     total = 10000

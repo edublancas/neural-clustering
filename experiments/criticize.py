@@ -7,8 +7,8 @@ from neural_clustering.criticize.criticize import find_cluster_assignments
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 cfg = config.load('config.yaml')
-session_name = 'saved_session'
+session_name = '2017-11-15T01/52/00.310739-DPMM'
 
-qmu, qbeta = restore_session(cfg, session_name)
+qmu, qbeta, x_train, params = restore_session(cfg, session_name)
 
-clusters = find_cluster_assignments(x_train, qmu, truncation_level)
+clusters = find_cluster_assignments(x_train, qmu, params)

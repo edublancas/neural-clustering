@@ -6,6 +6,8 @@ from edward.models import (Normal, MultivariateNormalDiag, Beta,
                            InverseGamma,  ParamMixture, Empirical)
 import edward as ed
 import tensorflow as tf
+import numpy as np
+import yaml
 
 
 logger = logging.getLogger(__name__)
@@ -59,4 +61,16 @@ def fit(x_train, truncation_level, cfg):
     saver.save(sess, output_path)
     logger.info('Session saved in {}'.format(output_path))
 
-    # TODO: save other parameters needed for session restore
+    output_path = os.path.join(directory, 'training.npy')
+    np.save(output_path, x_train)
+    logger.info('Training data saved in {}'.format(output_path))
+
+    params = dict(truncation_level=truncation_level,
+                  samples=S)
+
+    output_path = os.path.join(directory, 'params.yaml')
+
+    with open(output_path, 'w') as f:
+        yaml.dump(params, f)
+
+    logger.info('Params saved in {}'.format(output_path))
