@@ -1,10 +1,14 @@
 import os
 from datetime import datetime
+import logging
 
 from edward.models import (Normal, MultivariateNormalDiag, Beta,
                            InverseGamma,  ParamMixture, Empirical)
 import edward as ed
 import tensorflow as tf
+
+
+logger = logging.getLogger(__name__)
 
 
 def stick_breaking(v):
@@ -53,5 +57,6 @@ def fit(x_train, truncation_level, cfg):
 
     output_path = os.path.join(directory, 'session.ckpt')
     saver.save(sess, output_path)
+    logger.info('Session saved in {}'.format(output_path))
 
     # TODO: save other parameters needed for session restore
