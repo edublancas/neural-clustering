@@ -105,6 +105,18 @@ for _ in range(inference.n_iter):
 # Criticism #
 #############
 
+# visualizing parameters
+plt.plot(qpi.params.eval())
+plt.show()
+
+qmu_params = qmu.params.eval()
+plt.plot(qmu_params[:, 0, :])
+plt.show()
+
+qmu_params = qmu.params.eval()
+plt.plot(qmu_params[:, 1, :])
+plt.show()
+
 # tutorial on criticism: http://edwardlib.org/tutorials/criticism
 
 SC = 200
@@ -211,6 +223,3 @@ ed.ppc_stat_hist_plot(y[0], y_rep,
                       stat_name=r'$T \equiv$mean', bins=10)
 
 plt.show()
-
-
-# TODO: plot params values at eveery training iteration

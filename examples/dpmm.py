@@ -82,7 +82,7 @@ for _ in range(inference.n_iter):
 
 
 # Inference with HMC - works (SGLD also works)
-S = 10000
+S = 20000
 
 qmu = Empirical(tf.Variable(tf.zeros([S, K, D])))
 qbeta = Empirical(tf.Variable(tf.zeros([S, K])))
@@ -98,6 +98,13 @@ inference.run()
 
 
 # Criticism
+# TODO: plot params values at eveery training iteration
+plt.plot(qbeta.params.eval())
+plt.show()
+qbeta.params.eval()[-10:, :]
+
+qmu.params.eval()[-2:, :, :]
+
 SC = 1000
 
 mu_sample = qmu.sample(SC)
