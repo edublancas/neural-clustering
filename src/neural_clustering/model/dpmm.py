@@ -9,6 +9,8 @@ import tensorflow as tf
 import numpy as np
 import yaml
 
+from .util import get_commit_hash
+
 
 logger = logging.getLogger(__name__)
 
@@ -18,9 +20,16 @@ def stick_breaking(v):
     return v * remaining_pieces
 
 
-def fit(x_train, truncation_level, cfg):
+def fit(x_train, truncation_level, cfg, samples=10000,
+        inference_alg=ed.HMC, inference_params=None):
     """Fit a truncated DPMM model with Edward
+
+    Notes
+    -----
+    Only tested with HMC and SGLD
     """
+    inference_name = inference_alg.__name__
+
     N, D = x_train.shape
     T = K = truncation_level
 
@@ -35,14 +44,17 @@ def fit(x_train, truncation_level, cfg):
                      MultivariateNormalDiag,
                      sample_shape=N)
 
-    # Inference with HMC - works (SGLD also works)
-    S = 10000
+    S = samples
 
     qmu = Empirical(tf.Variable(tf.zeros([S, K, D])))
     qbeta = Empirical(tf.Variable(tf.zeros([S, K])))
 
-    inference = ed.HMC({beta: qbeta, mu: qmu}, data={x: x_train})
-    inference.initialize()
+    inference = inference_alg({beta: qbeta, mu: qmu}, data={x: x_train})
+
+    if inference_params:
+        inference.initialize(**inference_params)
+    else:
+        inference.initialize()
 
     sess = ed.get_session()
     init = tf.global_variables_initializer()
@@ -53,8 +65,8 @@ def fit(x_train, truncation_level, cfg):
     # Save results
     saver = tf.train.Saver()
 
-    timestamp = datetime.now().strftime('%d-%b-%Y@%H-%M-%S')
-    directory_name = '{}-DPMM'.format(timestamp)
+    timestamp = datetime.now()
+    directory_name = '{}-DPMM'.format(timestamp.strftime('%d-%b-%Y@%H-%M-%S'))
     directory = os.path.join(cfg['root'], 'sessions', directory_name)
     os.makedirs(directory)
 
@@ -66,8 +78,12 @@ def fit(x_train, truncation_level, cfg):
     np.save(output_path, x_train)
     logger.info('Training data saved in {}'.format(output_path))
 
-    params = dict(truncation_level=truncation_level,
-                  samples=S)
+    params = dict(model_type='DPMM',
+                  truncation_level=truncation_level,
+                  inference_algoritm=inference_name,
+                  samples=samples, inference_params=inference_params,
+                  timestamp=timestamp.isoformat(),
+                  git_hash=get_commit_hash())
 
     output_path = os.path.join(directory, 'params.yaml')
 
