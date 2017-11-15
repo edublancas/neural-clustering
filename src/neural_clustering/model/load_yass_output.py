@@ -1,7 +1,7 @@
 import os
 
 import numpy as np
-from neural_noise import config
+from neural_clustering import config
 
 cfg = config.load('config.yaml')
 cfg = config.load('server_config.yaml')
