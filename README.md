@@ -6,6 +6,7 @@ Machine Learning with Probabilistic Programming, Columbia University, Fall 2017.
 
 ## Structure
 
+* examples/ - truncated DPMM with Edward example
 * notebooks/ - Jupyter notebooks
 * src/ - Source code for the package that contains the utility functions
 * yass_config/ - Configuration files for the [YASS](https://github.com/paninski-lab/yass) package
