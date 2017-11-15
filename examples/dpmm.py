@@ -35,7 +35,7 @@ ed.set_seed(0)
 
 N = 500
 D = 2
-T = K = 5  # truncation level in DP
+T = K = 3  # truncation level in DP
 
 x_train = build_toy_dataset(N)
 
@@ -48,8 +48,16 @@ beta = Beta(tf.ones(T), tf.ones(T))
 pi = stick_breaking(beta)
 
 mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
-sigmasq = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
+mu
 
+m = np.array([[5.0, 5.0], [-5.0, -5.0], [5.0, 5.0]]).astype('float32')
+mu = Normal(m, tf.ones((K, D)))
+mu
+
+sigmasq = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
+sigmasq
+sigmasq = InverseGamma(tf.ones((K, D)), tf.ones((K, D)))
+sigmasq
 
 x = ParamMixture(pi, {'loc': mu, 'scale_diag': tf.sqrt(sigmasq)},
                  MultivariateNormalDiag,
@@ -94,16 +102,19 @@ sess = ed.get_session()
 init = tf.global_variables_initializer()
 init.run()
 
-inference.run()
-
+inference.run(step_size=0.1, n_steps=2)
 
 # Criticism
-# TODO: plot params values at eveery training iteration
+
+# plotting params
 plt.plot(qbeta.params.eval())
 plt.show()
-qbeta.params.eval()[-10:, :]
 
-qmu.params.eval()[-2:, :, :]
+qmu_params = qmu.params.eval()
+plt.plot(qmu_params[:, 2, :])
+plt.show()
+
+qmu_params[-1:]
 
 SC = 1000
 
