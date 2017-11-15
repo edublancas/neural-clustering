@@ -11,6 +11,10 @@ import tensorflow as tf
 
 from matplotlib import pyplot as plt
 
+import os
+from datetime import datetime
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+
 
 def build_toy_dataset(N):
     pi = np.array([0.4, 0.6])
@@ -78,7 +82,7 @@ sigma = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
 components = [MultivariateNormalDiag(mu[k], sigma[k], sample_shape=N)
               for k in range(K)]
 # add tf.sqrt
-x = ParamMixture(pi, {'loc': mu, 'scale_diag': sigmasq},
+x = ParamMixture(pi, {'loc': mu, 'scale_diag': tf.sqrt(sigmasq)},
                  MultivariateNormalDiag,
                  sample_shape=N)
 
@@ -94,6 +98,7 @@ x = ParamMixture(pi, {'loc': mu, 'scale_diag': sigmasq},
 #              tf.nn.softplus(tf.Variable(tf.random_normal([T]))))
 
 # inference = ed.KLqp({beta: qbeta, mu: qmu}, data={x: x_train})
+# inference.initialize()
 
 
 # number of samples
@@ -145,6 +150,21 @@ inference.run()
 # Calculate likelihood for each data point and cluster assignment,
 # averaged over many posterior samples. ``x_post`` has shape (N, 100, K, D).
 
+# saving results
+saver = tf.train.Saver()
+
+
+directory = os.path.join(cfg['root'], 'sessions')
+name = '{}.ckpt'.format(datetime.now().isoformat())
+
+
+if not os.path.exists(directory):
+    os.makedirs(directory)
+
+output_path = os.path.join(directory, name)
+
+save_path = saver.save(sess, output_path)
+
 # http://edwardlib.org/api/ed/MonteCarlo
 total = 10000
 burn_in = 4000
@@ -168,12 +188,13 @@ log_liks = tf.reduce_sum(log_liks, 3)
 log_liks = tf.reduce_mean(log_liks, 1)
 
 # Choose the cluster with the highest likelihood for each data point.
-# clusters = tf.argmax(log_liks, 1).eval()
-clusters = np.argmax(log_liks, 1)
+clusters = tf.argmax(log_liks, 1).eval()
+# clusters = np.argmax(log_liks, 1)
 
 print('found {} clusters'.format(len(np.unique(clusters))))
-
 np.unique(clusters, return_counts=True)
+
+np.save(os.path.join(directory, 'clusters.npy'), clusters)
 
 # need to check how to plot this stuff....
 plt.scatter(x_train[:, 0], x_train[:, 1], c=clusters)
