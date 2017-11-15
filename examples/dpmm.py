@@ -50,7 +50,7 @@ pi = stick_breaking(beta)
 mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
 mu
 
-m = np.array([[5.0, 5.0], [-5.0, -5.0], [5.0, 5.0]]).astype('float32')
+m = np.array([[5.0, 5.0], [0.0, 0.0], [5.0, 5.0]]).astype('float32')
 mu = Normal(m, tf.ones((K, D)))
 mu
 
@@ -90,7 +90,7 @@ for _ in range(inference.n_iter):
 
 
 # Inference with HMC - works (SGLD also works)
-S = 20000
+S = 50000
 
 qmu = Empirical(tf.Variable(tf.zeros([S, K, D])))
 qbeta = Empirical(tf.Variable(tf.zeros([S, K])))
@@ -111,10 +111,10 @@ plt.plot(qbeta.params.eval())
 plt.show()
 
 qmu_params = qmu.params.eval()
-plt.plot(qmu_params[:, 2, :])
-plt.show()
-
 qmu_params[-1:]
+
+plt.plot(qmu_params[:, 0, :])
+plt.show()
 
 SC = 1000
 
