@@ -53,7 +53,8 @@ def fit(x_train, truncation_level, cfg):
     # Save results
     saver = tf.train.Saver()
 
-    directory_name = '{}-DPMM'.format(datetime.now().isoformat())
+    timestamp = datetime.now().strftime('%d-%b-%Y@%H-%M-%S')
+    directory_name = '{}-DPMM'.format(timestamp)
     directory = os.path.join(cfg['root'], 'sessions', directory_name)
     os.makedirs(directory)
 

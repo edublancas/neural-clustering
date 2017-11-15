@@ -1,5 +1,13 @@
 import tensorflow as tf
 from edward.models import Normal
+import numpy as np
+
+
+def relevel_clusters(clusters):
+    group_ids = np.unique(clusters)
+    groups = len(group_ids)
+    mapping = {k: v for k, v in zip(group_ids, range(groups))}
+    return np.array([mapping[k] for k in clusters])
 
 
 def find_cluster_assignments(x_train, qmu, params):
@@ -30,5 +38,4 @@ def find_cluster_assignments(x_train, qmu, params):
 
     clusters = tf.argmax(log_liks, 1).eval()
 
-    # TODO: relevel clusters
-    return clusters
+    return relevel_clusters(clusters)
