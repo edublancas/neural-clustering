@@ -6,7 +6,8 @@ https://gist.github.com/dustinvtran/d8cc112636b219776621444324919928
 http://edwardlib.org/tutorials/unsupervised
 """
 from edward.models import (Normal, MultivariateNormalDiag, Beta,
-                           InverseGamma,  ParamMixture, Empirical)
+                           InverseGamma,  ParamMixture, Empirical,
+                           Gamma)
 import edward as ed
 import numpy as np
 import tensorflow as tf
@@ -45,6 +46,10 @@ plt.show()
 
 # Model
 beta = Beta(tf.ones(T), tf.ones(T))
+
+alpha = Gamma(1.0, 1.0)
+beta = Beta(tf.ones(T), tf.ones(T) * alpha)
+
 pi = stick_breaking(beta)
 
 mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
@@ -94,26 +99,31 @@ S = 50000
 
 qmu = Empirical(tf.Variable(tf.zeros([S, K, D])))
 qbeta = Empirical(tf.Variable(tf.zeros([S, K])))
+qalpha = Empirical(tf.Variable(tf.zeros(1)))
 
-inference = ed.HMC({beta: qbeta, mu: qmu}, data={x: x_train})
+inference = ed.SGLD({beta: qbeta, mu: qmu, alpha: qalpha}, data={x: x_train})
+inference = ed.SGLD({beta: qbeta, mu: qmu}, data={x: x_train})
 inference.initialize()
 
 sess = ed.get_session()
 init = tf.global_variables_initializer()
 init.run()
 
-inference.run(step_size=0.1, n_steps=2)
+# inference.run(step_size=0.1, n_steps=2)
+inference.run()
 
 # Criticism
 
 # plotting params
+qalpha.params.eval()
+
 plt.plot(qbeta.params.eval())
 plt.show()
 
 qmu_params = qmu.params.eval()
 qmu_params[-1:]
 
-plt.plot(qmu_params[:, 0, :])
+plt.plot(qmu_params[:, 2, :])
 plt.show()
 
 SC = 1000
