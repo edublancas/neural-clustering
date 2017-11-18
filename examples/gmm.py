@@ -110,7 +110,7 @@ plt.plot(qpi.params.eval())
 plt.show()
 
 qmu_params = qmu.params.eval()
-plt.plot(qmu_params[:, 0, :])
+plt.plot(qmu_params[:, :, 0])
 plt.show()
 
 qmu_params = qmu.params.eval()

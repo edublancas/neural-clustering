@@ -14,10 +14,12 @@ from .util import ensure_iterator, sample
 from .table import Table
 
 
+# TODO: use functions in util module
 def _is_iter(obj):
     return isinstance(obj, collections.Iterable)
 
 
+# TODO: use functions in util module
 def _grid_size(group_ids, max_cols=None):
     total = len(group_ids)
     sq = sqrt(total)
@@ -32,6 +34,7 @@ def _grid_size(group_ids, max_cols=None):
     return rows, cols
 
 
+# TODO: use functions in util module
 def _make_grid_plot(fn, group_ids, ax, sharex, sharey, max_cols=None):
     rows, cols = _grid_size(group_ids, max_cols)
 
