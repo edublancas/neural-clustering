@@ -29,7 +29,6 @@ def fit(x_train, k, cfg, samples, inference_alg=ed.Gibbs,
     mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
     sigmasq = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
 
-
     x = ParamMixture(pi, {'loc': mu, 'scale_diag': tf.sqrt(sigmasq)},
                      MultivariateNormalDiag,
                      sample_shape=N)
