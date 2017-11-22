@@ -7,6 +7,23 @@ import os
 import yaml
 
 
+def experiment(cfg, session_name):
+    """Restores an experiment
+    """
+    # tf.reset_default_graph()
+
+    path_to_params = os.path.join(cfg['root'],
+                                  'sessions/{}'.format(session_name),
+                                  'params.yaml')
+
+    with open(path_to_params) as f:
+        params = yaml.load(f)
+
+    restore_function = dpmm if params['model_type'] == 'DPMM' else gmm
+
+    return restore_function(cfg, session_name)
+
+
 def dpmm(cfg, session_name):
     """Restores a DPMM session
 
@@ -47,7 +64,7 @@ def dpmm(cfg, session_name):
     sess = ed.get_session()
     saver.restore(sess, path_to_session)
 
-    return qmu, qbeta, x_train, params
+    return dict(qmu=qmu, qbeta=qbeta, x_train=x_train, params=params)
 
 
 def gmm(cfg, session_name):
@@ -77,10 +94,8 @@ def gmm(cfg, session_name):
     with open(path_to_params) as f:
         params = yaml.load(f)
 
-    tf.reset_default_graph()
-
     N, D = x_train.shape
-    K = params['truncation_level']
+    K = params['k']
     T = params['samples']
 
     qpi = Empirical(tf.Variable(tf.ones([T, K]) / K))
@@ -92,4 +107,5 @@ def gmm(cfg, session_name):
     sess = ed.get_session()
     saver.restore(sess, path_to_session)
 
-    return qpi, qmu, qsigmasq, qz
+    return dict(qpi=qpi, qmu=qmu, qsigmasq=qsigmasq, qz=qz, x_train=x_train,
+                params=params)

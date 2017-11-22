@@ -28,6 +28,8 @@ def fit(x_train, truncation_level, cfg, samples=10000,
     -----
     Only tested with HMC and SGLD
     """
+    # tf.reset_default_graph()
+
     inference_name = inference_alg.__name__
 
     N, D = x_train.shape

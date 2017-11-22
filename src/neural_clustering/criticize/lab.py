@@ -19,14 +19,20 @@ def list_experiments(cfg):
     return glob(os.path.join(path_to_sessions, '*/'))
 
 
-def summarize_experiments(cfg):
-    """Summarizes experiments in {root}/sessions/
+def load_experiments_params(cfg):
+    """Returns a list of dicts with experiments params
     """
     path_to_experiments = list_experiments(cfg)
     path_to_params = [os.path.join(e, 'params.yaml') for e
                       in path_to_experiments]
 
-    params = [load_yaml(p) for p in path_to_params]
+    return [load_yaml(p) for p in path_to_params]
+
+
+def summarize_experiments(cfg):
+    """Summarizes experiments in {root}/sessions/
+    """
+    params = load_experiments_params(cfg)
     all_keys = [list(p.keys()) for p in params]
     header = list(set([item for sublist in all_keys for item in sublist]))
     content = [[p.get(h) for h in header] for p in params]
