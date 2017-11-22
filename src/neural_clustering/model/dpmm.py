@@ -83,7 +83,8 @@ def fit(x_train, truncation_level, cfg, samples=10000,
                   inference_algoritm=inference_name,
                   samples=samples, inference_params=inference_params,
                   timestamp=timestamp.isoformat(),
-                  git_hash=get_commit_hash())
+                  git_hash=get_commit_hash(),
+                  name=directory_name)
 
     output_path = os.path.join(directory, 'params.yaml')
 

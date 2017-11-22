@@ -1,4 +1,5 @@
-from .restore import restore_session
 from .criticize import find_cluster_assignments
+from .lab import list_experiments, summarize_experiments
 
-__all__ = ['restore_session', 'find_cluster_assignments']
+__all__ = ['list_experiments', 'summarize_experiments',
+           'find_cluster_assignments']

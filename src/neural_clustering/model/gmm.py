@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-import logger
+import logging
 
 import yaml
 import numpy as np
@@ -12,7 +12,10 @@ from edward.models import (Dirichlet, InverseGamma, MultivariateNormalDiag,
 from .util import get_commit_hash
 
 
-def fit(x_train, k, cfg, samples, inference_alg=ed.Gibbs,
+logger = logging.getLogger(__name__)
+
+
+def fit(x_train, k, cfg, samples=10000, inference_alg=ed.Gibbs,
         inference_params=None):
     """Fits a GMM using Edward
     """
@@ -44,7 +47,11 @@ def fit(x_train, k, cfg, samples, inference_alg=ed.Gibbs,
     # http://edwardlib.org/api/ed/Gibbs
     inference = ed.Gibbs({pi: qpi, mu: qmu, sigmasq: qsigmasq, z: qz},
                          data={x: x_train})
-    inference.initialize()
+
+    if inference_params:
+        inference.initialize(**inference_params)
+    else:
+        inference.initialize()
 
     sess = ed.get_session()
     init = tf.global_variables_initializer()
@@ -73,7 +80,8 @@ def fit(x_train, k, cfg, samples, inference_alg=ed.Gibbs,
                   inference_algoritm=inference_name,
                   samples=samples, inference_params=inference_params,
                   timestamp=timestamp.isoformat(),
-                  git_hash=get_commit_hash())
+                  git_hash=get_commit_hash(),
+                  name=directory_name)
 
     output_path = os.path.join(directory, 'params.yaml')
 
