@@ -27,7 +27,7 @@ def summarize_experiments(cfg):
                       in path_to_experiments]
 
     params = [load_yaml(p) for p in path_to_params]
-    header = params[0].keys()
-    content = [p.values() for p in params]
-
+    all_keys = [list(p.keys()) for p in params]
+    header = list(set([item for sublist in all_keys for item in sublist]))
+    content = [[p.get(h) for h in header] for p in params]
     return Table(content, header)
