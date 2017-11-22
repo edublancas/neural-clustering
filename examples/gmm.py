@@ -1,5 +1,5 @@
 """
-Gaussian mixture modelusing Edward
+Gaussian mixture model using Edward
 
 Based on:
 http://edwardlib.org/tutorials/unsupervised

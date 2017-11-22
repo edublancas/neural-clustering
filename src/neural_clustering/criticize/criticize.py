@@ -1,6 +1,12 @@
+import logging
+import os
+
 import tensorflow as tf
 from edward.models import Normal
 import numpy as np
+
+
+logger = logging.getLogger(__name__)
 
 
 def relevel_clusters(clusters):
@@ -14,7 +20,7 @@ def find_cluster_assignments(x_train, qmu, params):
     """Find cluster assignments
     """
     N, D = x_train.shape
-    K = params['truncation_level']
+    K = params.get('truncation_level') or params.get('k')
 
     # http://edwardlib.org/api/ed/MonteCarlo
     total = 10000
@@ -39,3 +45,17 @@ def find_cluster_assignments(x_train, qmu, params):
     clusters = tf.argmax(log_liks, 1).eval()
 
     return relevel_clusters(clusters)
+
+
+def store_cluster_assignments(cfg, x_train, qmu, params):
+    """Store cluster assignments for experiment
+    """
+    clusters = find_cluster_assignments(x_train, qmu, params)
+
+    path_to_sessions = os.path.join(cfg['root'], 'sessions')
+    path_to_output = os.path.join(path_to_sessions, params['name'],
+                                  'clusters.npy')
+    np.save(path_to_output, clusters)
+    logger.info('Cluster assignmens stored in {}'.format(path_to_output))
+
+    return clusters
