@@ -96,9 +96,9 @@ for _ in range(inference.n_iter):
     inference.print_progress(info_dict)
     t = info_dict['t']
 
-    if t % inference.n_print == 0:
-        print("\nInferred cluster means:")
-        print(sess.run(running_cluster_means, {t_ph: t - 1}))
+    # if t % inference.n_print == 0:
+    #     print("\nInferred cluster means:")
+    #     print(sess.run(running_cluster_means, {t_ph: t - 1}))
 
 
 #############
@@ -145,7 +145,7 @@ mus = np.mean(qmu.sample(1000).eval(), axis=0)
 # estimate cluster stds
 stds = np.sqrt(np.mean(qsigmasq.sample(1000).eval(), axis=0))
 
-# estimate proportions
+# predictive distribution
 pis = np.mean(qpi.sample(1000).eval(), axis=0)
 
 x_ = ParamMixture(pis, {'loc': mus, 'scale_diag': stds},
@@ -196,29 +196,42 @@ x_original = x.sample(500).eval()
 sns.jointplot(x_original[:, 0], x_original[:, 1], kind='kde')
 plt.show()
 
-# sample from post predictive disttribution
+
+# posterior predictive distribution
 # this doesnt look right...
-x_pred = ed.copy(x, {pi: qpi, mu: qmu, sigmasq: qsigmasq, z: qz})
+x_pred = ed.copy(x, {pi: qpi, mu: qmu, sigmasq: qsigmasq})
+# this looks better...
+x_pred = ParamMixture(qpi, {'loc': qmu, 'scale_diag': tf.sqrt(qsigmasq)},
+                      MultivariateNormalDiag,
+                      sample_shape=N)
+
 x_pred_sample = x_pred.sample(500).eval()
 sns.jointplot(x_pred_sample[:, 0], x_pred_sample[:, 1], kind='kde')
 plt.show()
 
 # log-likelihood performance
+ed.evaluate('log_likelihood', data={x: x_train})
 ed.evaluate('log_likelihood', data={x_pred: x_train})
+ed.evaluate('log_likelihood', data={x_: x_train})
 
 # ppc
 y_rep, y = ed.ppc(lambda xs, mus: tf.reduce_mean(xs[x]),
                   data={x: x_train},
                   n_samples=1000)
+ed.ppc_stat_hist_plot(y[0], y_rep,
+                      stat_name=r'$T \equiv$mean', bins=10)
+plt.show()
 
 y_rep, y = ed.ppc(lambda xs, mus: tf.reduce_mean(xs[x_pred]),
                   data={x_pred: x_train},
                   n_samples=1000)
+ed.ppc_stat_hist_plot(y[0], y_rep,
+                      stat_name=r'$T \equiv$mean', bins=10)
+plt.show()
 
 y_rep, y = ed.ppc(lambda xs, mus: tf.reduce_mean(xs[x_]),
                   data={x_: x_train},
                   n_samples=1000)
-
 ed.ppc_stat_hist_plot(y[0], y_rep,
                       stat_name=r'$T \equiv$mean', bins=10)
 plt.show()
