@@ -137,24 +137,6 @@ plt.scatter(x_train[:, 0], x_train[:, 1], c=clusters)
 plt.title("Predicted cluster assignments")
 plt.show()
 
-# Esimate parameters and draw from the model
-
-# estimate cluster means
-mus = np.mean(qmu.sample(1000).eval(), axis=0)
-
-# estimate cluster stds
-stds = np.sqrt(np.mean(qsigmasq.sample(1000).eval(), axis=0))
-
-# predictive distribution
-pis = np.mean(qpi.sample(1000).eval(), axis=0)
-
-x_ = ParamMixture(pis, {'loc': mus, 'scale_diag': stds},
-                  MultivariateNormalDiag,
-                  sample_shape=N)
-sample = x_.sample(500).eval()
-sns.jointplot(sample[:, 0], sample[:, 1], kind='kde')
-plt.show()
-
 
 # plotting pis
 # https://seaborn.pydata.org/tutorial/distributions.html
@@ -208,6 +190,19 @@ x_pred = ParamMixture(qpi, {'loc': qmu, 'scale_diag': tf.sqrt(qsigmasq)},
 x_pred_sample = x_pred.sample(500).eval()
 sns.jointplot(x_pred_sample[:, 0], x_pred_sample[:, 1], kind='kde')
 plt.show()
+
+# predictive distribution
+mus = np.mean(qmu.sample(1000).eval(), axis=0)
+stds = np.sqrt(np.mean(qsigmasq.sample(1000).eval(), axis=0))
+pis = np.mean(qpi.sample(1000).eval(), axis=0)
+
+x_ = ParamMixture(pis, {'loc': mus, 'scale_diag': stds},
+                  MultivariateNormalDiag,
+                  sample_shape=N)
+sample = x_.sample(500).eval()
+sns.jointplot(sample[:, 0], sample[:, 1], kind='kde')
+plt.show()
+
 
 # log-likelihood performance
 ed.evaluate('log_likelihood', data={x: x_train})
