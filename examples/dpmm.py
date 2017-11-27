@@ -4,6 +4,8 @@ Truncated DPMM using Edward
 Based on:
 https://gist.github.com/dustinvtran/d8cc112636b219776621444324919928
 http://edwardlib.org/tutorials/unsupervised
+http://docs.pymc.io/notebooks/dp_mix.html
+https://discourse.edwardlib.org/t/dpm-model-for-clustering/97/6
 """
 from edward.models import (Normal, MultivariateNormalDiag, Beta,
                            InverseGamma,  ParamMixture, Empirical,
@@ -12,11 +14,12 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
+import seaborn as sns
 
 
 def build_toy_dataset(N):
     pi = np.array([0.4, 0.6])
-    mus = [[5, 5], [-5, -5]]
+    mus = [[5.0, 5.0], [-5.0, -5.0]]
     stds = [[1.0, 1.0], [1.0, 1.0]]
     x = np.zeros((N, 2), dtype=np.float32)
 
@@ -29,14 +32,21 @@ def build_toy_dataset(N):
 
 def stick_breaking(v):
     remaining_pieces = tf.concat([tf.ones(1), tf.cumprod(1.0 - v)[:-1]], 0)
-    return v * remaining_pieces
+    weights = v * remaining_pieces
+    return tf.concat([weights, [1.0 - tf.reduce_sum(weights)]], axis=0)
+
+
+# def stick_breaking(v):
+#     remaining_pieces = tf.concat([tf.ones(1), tf.cumprod(1.0 - v)[:-1]], 0)
+#     weights = v * remaining_pieces
+#     return weights
 
 
 ed.set_seed(0)
 
 N = 500
 D = 2
-T = K = 3  # truncation level in DP
+T = K = 3  # truncation level
 
 x_train = build_toy_dataset(N)
 
@@ -45,24 +55,36 @@ plt.scatter(x_train[:, 0], x_train[:, 1])
 plt.show()
 
 # Model
-beta = Beta(tf.ones(T), tf.ones(T))
+# beta = Beta(tf.ones(T - 1), tf.ones(T - 1))
+
+# sns.distplot(beta.sample(1000).eval()[:, 0])
+# plt.show()
+
+
+# sns.distplot(Beta(1.0, 1.0).sample(100).eval())
+# plt.show()
 
 alpha = Gamma(1.0, 1.0)
-beta = Beta(tf.ones(T), tf.ones(T) * alpha)
+beta = Beta(tf.ones(T - 1), tf.ones(T - 1) * alpha)
+
+# s = beta.sample(1)[0, :]
+# stick_breaking(s).eval()
 
 pi = stick_breaking(beta)
 
 mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
 mu
 
-m = np.array([[5.0, 5.0], [0.0, 0.0], [5.0, 5.0]]).astype('float32')
+m = np.array([[3.0, 3.0], [0.0, 0.0], [-3.0, -3.0]]).astype('float32')
 mu = Normal(m, tf.ones((K, D)))
 mu
 
-sigmasq = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
-sigmasq
-sigmasq = InverseGamma(tf.ones((K, D)), tf.ones((K, D)))
-sigmasq
+# sigmasq = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
+# sigmasq
+# sigmasq = InverseGamma(tf.ones((K, D)), tf.ones((K, D)))
+# sigmasq
+
+sigmasq = tf.ones((K, D))
 
 x = ParamMixture(pi, {'loc': mu, 'scale_diag': tf.sqrt(sigmasq)},
                  MultivariateNormalDiag,
@@ -72,8 +94,8 @@ x = ParamMixture(pi, {'loc': mu, 'scale_diag': tf.sqrt(sigmasq)},
 # Inference with KLqp - getting nans
 qmu = Normal(tf.Variable(tf.random_normal([K, D])),
              tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))))
-qbeta = Beta(tf.nn.softplus(tf.Variable(tf.random_normal([T]))),
-             tf.nn.softplus(tf.Variable(tf.random_normal([T]))))
+qbeta = Beta(tf.nn.softplus(tf.Variable(tf.random_normal([T - 1]))),
+             tf.nn.softplus(tf.Variable(tf.random_normal([T - 1]))))
 
 inference = ed.KLqp({beta: qbeta, mu: qmu}, data={x: x_train})
 inference.initialize(n_samples=5, n_iter=500, n_print=25)
@@ -95,14 +117,16 @@ for _ in range(inference.n_iter):
 
 
 # Inference with HMC - works (SGLD also works)
-S = 50000
+S = 20000
 
 qmu = Empirical(tf.Variable(tf.zeros([S, K, D])))
-qbeta = Empirical(tf.Variable(tf.zeros([S, K])))
-qalpha = Empirical(tf.Variable(tf.zeros(1)))
+qbeta = Empirical(tf.Variable(tf.zeros([S, K - 1])))
+qalpha = Empirical(tf.Variable(tf.ones(S)))
 
-inference = ed.SGLD({beta: qbeta, mu: qmu, alpha: qalpha}, data={x: x_train})
-inference = ed.SGLD({beta: qbeta, mu: qmu}, data={x: x_train})
+inference = ed.SGLD({alpha: qalpha, mu: qmu}, data={x: x_train})
+# inference = ed.SGLD({beta: qbeta, mu: qmu}, data={x: x_train})
+
+
 inference.initialize()
 
 sess = ed.get_session()
@@ -115,7 +139,11 @@ inference.run()
 # Criticism
 
 # plotting params
-qalpha.params.eval()
+plt.plot(qalpha.params.eval())
+plt.show()
+
+sns.distplot(qalpha.sample(1000).eval())
+plt.show()
 
 plt.plot(qbeta.params.eval())
 plt.show()
@@ -123,8 +151,26 @@ plt.show()
 qmu_params = qmu.params.eval()
 qmu_params[-1:]
 
-plt.plot(qmu_params[:, 2, :])
+plt.plot(qmu_params[:, 0, :])
 plt.show()
+
+
+# original data
+x_original = x.sample(500).eval()
+sns.jointplot(x_original[:, 0], x_original[:, 1], kind='kde')
+plt.show()
+
+
+# posterior predictive
+x_pred = ParamMixture(stick_breaking(qbeta),
+                      {'loc': qmu, 'scale_diag': tf.sqrt(sigmasq)},
+                      MultivariateNormalDiag,
+                      sample_shape=N)
+
+x_pred_sample = x_pred.sample(500).eval()
+sns.jointplot(x_pred_sample[:, 0], x_pred_sample[:, 1], kind='kde')
+plt.show()
+
 
 SC = 1000
 
