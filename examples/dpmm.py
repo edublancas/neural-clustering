@@ -9,7 +9,7 @@ https://discourse.edwardlib.org/t/dpm-model-for-clustering/97/6
 """
 from edward.models import (Normal, MultivariateNormalDiag, Beta,
                            InverseGamma,  ParamMixture, Empirical,
-                           Gamma)
+                           Gamma, Categorical)
 import edward as ed
 import numpy as np
 import tensorflow as tf
@@ -104,11 +104,12 @@ plt.show()
 # Inference with KLqp - getting nans
 qmu = Normal(tf.Variable(tf.random_normal([K, D])),
              tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))))
-qbeta = Beta(tf.nn.softplus(tf.Variable(tf.random_normal([T - 1]))),
-             tf.nn.softplus(tf.Variable(tf.random_normal([T - 1]))))
+# qbeta = Beta(tf.nn.softplus(tf.Variable(tf.random_normal([T - 1]))),
+             # tf.nn.softplus(tf.Variable(tf.random_normal([T - 1]))))
 
-inference = ed.KLqp({beta: qbeta, mu: qmu}, data={x: x_train})
-inference.initialize(n_samples=5, n_iter=500, n_print=25)
+# inference = ed.KLqp({beta: qbeta, mu: qmu}, data={x: x_train})
+inference = ed.KLqp({mu: qmu}, data={x: x_train})
+inference.initialize(n_samples=5, n_iter=1000, n_print=25)
 
 sess = ed.get_session()
 init = tf.global_variables_initializer()
@@ -127,7 +128,7 @@ for _ in range(inference.n_iter):
 
 
 # Inference with HMC - works (SGLD also works)
-S = 1000
+S = 5000
 
 qmu = Empirical(tf.Variable(tf.zeros([S, K, D])))
 # qbeta = Empirical(tf.Variable(tf.zeros([S, K])))
@@ -139,6 +140,20 @@ qz = Empirical(tf.Variable(tf.zeros([S, N], dtype=tf.int32)))
 
 inference = ed.Gibbs({mu: qmu, z: qz}, data={x: x_train})
 inference = ed.Gibbs({alpha: qalpha, mu: qmu, z: qz}, data={x: x_train})
+
+
+# galpha = Gamma(1.0, 1.0)
+# gmu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
+# gz = Categorical(tf.zeros([N, K]))
+
+# nope https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian_mh.py
+# inference = ed.MetropolisHastings(latent_vars={alpha: qalpha, mu: qmu, z: qz},
+#                                   proposal_vars={alpha: galpha, mu: gmu, z: gz},
+#                                   data={x: x_train})
+
+# inference = ed.MetropolisHastings(latent_vars={mu: qmu, z: qz},
+#                                   proposal_vars={mu: gmu, z: gz},
+#                                   data={x: x_train})
 
 
 inference.initialize()
