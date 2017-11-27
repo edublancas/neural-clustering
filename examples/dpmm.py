@@ -52,6 +52,7 @@ x_train = build_toy_dataset(N)
 
 # plot toy dataset
 plt.scatter(x_train[:, 0], x_train[:, 1])
+sns.jointplot(x_train[:, 0], x_train[:, 1], kind='kde')
 plt.show()
 
 # Model
@@ -66,18 +67,20 @@ plt.show()
 
 alpha = Gamma(1.0, 1.0)
 beta = Beta(tf.ones(T - 1), tf.ones(T - 1) * alpha)
+beta
 
 # s = beta.sample(1)[0, :]
 # stick_breaking(s).eval()
 
 pi = stick_breaking(beta)
+pi
 
 mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
 mu
 
-m = np.array([[3.0, 3.0], [0.0, 0.0], [-3.0, -3.0]]).astype('float32')
-mu = Normal(m, tf.ones((K, D)))
-mu
+# m = np.array([[10.0, 10.0], [0.0, 0.0], [-10.0, -10.0]]).astype('float32')
+# mu = Normal(m, tf.ones((K, D)))
+# mu
 
 # sigmasq = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
 # sigmasq
@@ -86,9 +89,16 @@ mu
 
 sigmasq = tf.ones((K, D))
 
+pi = tf.constant([0.39, 0.01, 0.60])
 x = ParamMixture(pi, {'loc': mu, 'scale_diag': tf.sqrt(sigmasq)},
                  MultivariateNormalDiag,
                  sample_shape=N)
+z = x.cat
+
+# original model
+x_original = x.sample(500).eval()
+sns.jointplot(x_original[:, 0], x_original[:, 1], kind='kde')
+plt.show()
 
 
 # Inference with KLqp - getting nans
@@ -117,14 +127,18 @@ for _ in range(inference.n_iter):
 
 
 # Inference with HMC - works (SGLD also works)
-S = 20000
+S = 1000
 
 qmu = Empirical(tf.Variable(tf.zeros([S, K, D])))
-qbeta = Empirical(tf.Variable(tf.zeros([S, K - 1])))
+# qbeta = Empirical(tf.Variable(tf.zeros([S, K])))
 qalpha = Empirical(tf.Variable(tf.ones(S)))
+qz = Empirical(tf.Variable(tf.zeros([S, N], dtype=tf.int32)))
 
-inference = ed.SGLD({alpha: qalpha, mu: qmu}, data={x: x_train})
+# inference = ed.SGLD({alpha: qalpha, mu: qmu}, data={x: x_train})
 # inference = ed.SGLD({beta: qbeta, mu: qmu}, data={x: x_train})
+
+inference = ed.Gibbs({mu: qmu, z: qz}, data={x: x_train})
+inference = ed.Gibbs({alpha: qalpha, mu: qmu, z: qz}, data={x: x_train})
 
 
 inference.initialize()
@@ -132,6 +146,20 @@ inference.initialize()
 sess = ed.get_session()
 init = tf.global_variables_initializer()
 init.run()
+
+
+t_ph = tf.placeholder(tf.int32, [])
+running_cluster_means = tf.reduce_mean(qmu.params[:t_ph], 0)
+
+for _ in range(inference.n_iter):
+    info_dict = inference.update()
+    inference.print_progress(info_dict)
+    t = info_dict['t']
+
+    if t % inference.n_print == 0:
+        print("\nInferred cluster means:")
+        print(sess.run(running_cluster_means, {t_ph: t - 1}))
+
 
 # inference.run(step_size=0.1, n_steps=2)
 inference.run()
@@ -145,24 +173,20 @@ plt.show()
 sns.distplot(qalpha.sample(1000).eval())
 plt.show()
 
-plt.plot(qbeta.params.eval())
-plt.show()
+# plt.plot(qbeta.params.eval())
+# plt.show()
 
 qmu_params = qmu.params.eval()
 qmu_params[-1:]
 
-plt.plot(qmu_params[:, 0, :])
-plt.show()
-
-
-# original data
-x_original = x.sample(500).eval()
-sns.jointplot(x_original[:, 0], x_original[:, 1], kind='kde')
+plt.plot(qmu_params[:, 2, :])
 plt.show()
 
 
 # posterior predictive
-x_pred = ParamMixture(stick_breaking(qbeta),
+qbeta = Beta(tf.ones(T - 1), tf.ones(T - 1) * qalpha)
+qpi = stick_breaking(beta)
+x_pred = ParamMixture(pi,
                       {'loc': qmu, 'scale_diag': tf.sqrt(sigmasq)},
                       MultivariateNormalDiag,
                       sample_shape=N)
