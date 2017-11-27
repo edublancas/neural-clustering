@@ -138,8 +138,8 @@ qz = Empirical(tf.Variable(tf.zeros([S, N], dtype=tf.int32)))
 # inference = ed.SGLD({alpha: qalpha, mu: qmu}, data={x: x_train})
 # inference = ed.SGLD({beta: qbeta, mu: qmu}, data={x: x_train})
 
-inference = ed.Gibbs({mu: qmu, z: qz}, data={x: x_train})
-inference = ed.Gibbs({alpha: qalpha, mu: qmu, z: qz}, data={x: x_train})
+# inference = ed.Gibbs({mu: qmu, z: qz}, data={x: x_train})
+inference = ed.SGLD({alpha: qalpha, mu: qmu, z: qz}, data={x: x_train})
 
 
 # galpha = Gamma(1.0, 1.0)
