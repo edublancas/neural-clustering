@@ -221,5 +221,4 @@ y_rep, y = ed.ppc(lambda xs, mus: tf.reduce_mean(xs[x_]),
 
 ed.ppc_stat_hist_plot(y[0], y_rep,
                       stat_name=r'$T \equiv$mean', bins=10)
-
 plt.show()
