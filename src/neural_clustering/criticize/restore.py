@@ -1,5 +1,5 @@
 import edward as ed
-from edward.models import Empirical
+from edward.models import Empirical, ParamMixture, MultivariateNormalDiag
 import tensorflow as tf
 import numpy as np
 
@@ -107,5 +107,8 @@ def gmm(cfg, session_name):
     sess = ed.get_session()
     saver.restore(sess, path_to_session)
 
+    x_pred = ParamMixture(qpi, {'loc': qmu, 'scale_diag': tf.sqrt(qsigmasq)},
+                          MultivariateNormalDiag, sample_shape=N)
+
     return dict(qpi=qpi, qmu=qmu, qsigmasq=qsigmasq, qz=qz, x_train=x_train,
-                params=params)
+                params=params, x_pred=x_pred)
