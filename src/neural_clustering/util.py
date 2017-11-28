@@ -1,5 +1,6 @@
 import collections
 from math import sqrt, ceil, floor
+import matplotlib.pyplot as plt
 
 
 def _is_iter(obj):
@@ -19,10 +20,10 @@ def _grid_size(n_groups, max_cols=None):
     return rows, cols
 
 
-def _make_grid_plot(fn, group_ids, ax, sharex, sharey, max_cols=None):
+def _make_grid_plot(fn, group_ids, sharex, sharey, max_cols=None):
     rows, cols = _grid_size(group_ids, max_cols)
 
-    f, axs = ax.subplots(rows, cols, sharex=sharex, sharey=sharey)
+    f, axs = plt.subplots(rows, cols, sharex=sharex, sharey=sharey)
 
     axs = axs if _is_iter(axs) else [axs]
 
@@ -33,12 +34,12 @@ def _make_grid_plot(fn, group_ids, ax, sharex, sharey, max_cols=None):
         fn(group_id=g, ax=ax)
 
 
-def _make_grid_plot_by_axis(fn, data, axis, ax, sharex, sharey, max_cols=None):
+def _make_grid_plot_by_axis(fn, data, axis, sharex, sharey, max_cols=None):
     group_ids = data.shape[axis]
 
     rows, cols = _grid_size(group_ids, max_cols)
 
-    f, axs = ax.subplots(rows, cols, sharex=sharex, sharey=sharey)
+    f, axs = plt.subplots(rows, cols, sharex=sharex, sharey=sharey)
 
     axs = axs if _is_iter(axs) else [axs]
 

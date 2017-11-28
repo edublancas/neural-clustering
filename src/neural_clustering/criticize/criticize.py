@@ -3,6 +3,7 @@ import os
 
 import tensorflow as tf
 from edward.models import Normal
+import edward as ed
 import numpy as np
 
 
@@ -59,3 +60,10 @@ def store_cluster_assignments(cfg, x_train, qmu, params):
     logger.info('Cluster assignmens stored in {}'.format(path_to_output))
 
     return clusters
+
+
+def ppc_plot(fn, stat_name, x_pred, x_train, n_samples=1000, bins=10):
+    y_rep, y = ed.ppc(fn, data={x_pred: x_train}, n_samples=n_samples)
+    ed.ppc_stat_hist_plot(y[0], y_rep,
+                          stat_name=r'$T \equiv$ {}'.format(stat_name),
+                          bins=bins)
