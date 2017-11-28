@@ -36,10 +36,10 @@ def stick_breaking(v):
     return tf.concat([weights, [1.0 - tf.reduce_sum(weights)]], axis=0)
 
 
-# def stick_breaking(v):
-#     remaining_pieces = tf.concat([tf.ones(1), tf.cumprod(1.0 - v)[:-1]], 0)
-#     weights = v * remaining_pieces
-#     return weights
+def stick_breaking(v):
+    remaining_pieces = tf.concat([tf.ones(1), tf.cumprod(1.0 - v)[:-1]], 0)
+    weights = v * remaining_pieces
+    return weights
 
 
 ed.set_seed(0)
@@ -56,7 +56,7 @@ sns.jointplot(x_train[:, 0], x_train[:, 1], kind='kde')
 plt.show()
 
 # Model
-# beta = Beta(tf.ones(T - 1), tf.ones(T - 1))
+beta = Beta(tf.ones(T - 1), tf.ones(T - 1))
 
 # sns.distplot(beta.sample(1000).eval()[:, 0])
 # plt.show()
@@ -65,9 +65,9 @@ plt.show()
 # sns.distplot(Beta(1.0, 1.0).sample(100).eval())
 # plt.show()
 
-alpha = Gamma(1.0, 1.0)
-beta = Beta(tf.ones(T - 1), tf.ones(T - 1) * alpha)
-beta
+# alpha = Gamma(1.0, 1.0)
+# beta = Beta(tf.ones(T - 1), tf.ones(T - 1) * alpha)
+# beta
 
 # s = beta.sample(1)[0, :]
 # stick_breaking(s).eval()
@@ -89,7 +89,7 @@ mu
 
 sigmasq = tf.ones((K, D))
 
-pi = tf.constant([0.39, 0.01, 0.60])
+# pi = tf.constant([0.39, 0.01, 0.60])
 x = ParamMixture(pi, {'loc': mu, 'scale_diag': tf.sqrt(sigmasq)},
                  MultivariateNormalDiag,
                  sample_shape=N)
@@ -102,14 +102,33 @@ plt.show()
 
 
 # Inference with KLqp - getting nans
-qmu = Normal(tf.Variable(tf.random_normal([K, D])),
-             tf.nn.softplus(tf.Variable(tf.random_normal([K, D]))))
+qalpha = Gamma(tf.Variable(1.0), tf.Variable(1.0))
+qbeta = Beta(tf.ones([T - 1]), tf.nn.softplus(tf.Variable(tf.ones([T - 1]))))
+
+m = np.array([[10.0, 10.0], [0.0, 0.0], [-10.0, -10.0]]).astype('float32')
+
+qmu = Normal(tf.Variable(m),
+             tf.nn.softplus(tf.Variable(tf.zeros([K, D]))))
+qz = Categorical(tf.nn.softmax(tf.Variable(tf.zeros([N, K]))))
+qsigmasq = InverseGamma(tf.Variable(tf.zeros([K, D])), tf.Variable(tf.zeros([K, D])))
+
+
 # qbeta = Beta(tf.nn.softplus(tf.Variable(tf.random_normal([T - 1]))),
              # tf.nn.softplus(tf.Variable(tf.random_normal([T - 1]))))
 
-# inference = ed.KLqp({beta: qbeta, mu: qmu}, data={x: x_train})
 inference = ed.KLqp({mu: qmu}, data={x: x_train})
-inference.initialize(n_samples=5, n_iter=1000, n_print=25)
+inference = ed.KLqp({mu: qmu, z: qz}, data={x: x_train})
+inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta}, data={x: x_train})
+inference = ed.KLqp({mu: qmu, beta: qbeta}, data={x: x_train})
+
+inference = ed.KLqp({beta: qbeta, mu: qmu, z: qz, sigmasq: qsigmasq}, data={x: x_train})
+
+inference = ed.KLqp({beta: qbeta, mu: qmu}, data={x: x_train})
+
+inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta, alpha: qalpha}, data={x: x_train})
+inference = ed.KLqp({mu: qmu, z: qz, alpha: qalpha}, data={x: x_train})
+
+inference.initialize(n_samples=5, n_iter=20000, n_print=25)
 
 sess = ed.get_session()
 init = tf.global_variables_initializer()
