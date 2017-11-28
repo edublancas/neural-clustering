@@ -121,10 +121,9 @@ inference = ed.KLqp({mu: qmu, z: qz}, data={x: x_train})
 inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta}, data={x: x_train})
 inference = ed.KLqp({mu: qmu, beta: qbeta}, data={x: x_train})
 
+
 inference = ed.KLqp({beta: qbeta, mu: qmu, z: qz, sigmasq: qsigmasq}, data={x: x_train})
-
 inference = ed.KLqp({beta: qbeta, mu: qmu}, data={x: x_train})
-
 inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta, alpha: qalpha}, data={x: x_train})
 inference = ed.KLqp({mu: qmu, z: qz, alpha: qalpha}, data={x: x_train})
 
