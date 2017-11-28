@@ -1,11 +1,22 @@
 """
-Truncated DPMM using Edward
+Truncated DPMM using Edward.
+
+It's been several attempts to implement truncated DPMM on Edward but there are
+many problems. First, inference cannot properly be made with MCMC since Edward
+is missing some parts regarding the Categorical distribution.
+
+Seems like the only options is to use variational inference. Here I am using
+KLqp, I bumped into several errors which have already been reported in
+discourse, I managed to have a working truncated DPMM model but inference
+is still bad, not sure exactly why. Since I had limited time and invested
+too much time on this I decided to also use GMM.
 
 Based on:
 https://gist.github.com/dustinvtran/d8cc112636b219776621444324919928
 http://edwardlib.org/tutorials/unsupervised
 http://docs.pymc.io/notebooks/dp_mix.html
 https://discourse.edwardlib.org/t/dpm-model-for-clustering/97/6
+https://discourse.edwardlib.org/t/variational-inference-for-dirichlet-process-mixtures/251
 """
 from edward.models import (Normal, MultivariateNormalDiag, Beta,
                            InverseGamma,  ParamMixture, Empirical,

@@ -1,5 +1,6 @@
 """
-Gaussian mixture model using Edward
+Gaussian mixture model using Edward. This script was used to familiarize
+with Edward model, inference and criticism modules
 
 Based on:
 http://edwardlib.org/tutorials/unsupervised
@@ -180,9 +181,6 @@ plt.show()
 
 
 # posterior predictive distribution
-# this doesnt look right...
-x_pred = ed.copy(x, {pi: qpi, mu: qmu, sigmasq: qsigmasq})
-# this looks better...
 x_pred = ParamMixture(qpi, {'loc': qmu, 'scale_diag': tf.sqrt(qsigmasq)},
                       MultivariateNormalDiag,
                       sample_shape=N)
