@@ -36,10 +36,10 @@ def stick_breaking(v):
     return tf.concat([weights, [1.0 - tf.reduce_sum(weights)]], axis=0)
 
 
-def stick_breaking(v):
-    remaining_pieces = tf.concat([tf.ones(1), tf.cumprod(1.0 - v)[:-1]], 0)
-    weights = v * remaining_pieces
-    return weights
+# def stick_breaking(v):
+#     remaining_pieces = tf.concat([tf.ones(1), tf.cumprod(1.0 - v)[:-1]], 0)
+#     weights = v * remaining_pieces
+#     return weights
 
 
 ed.set_seed(0)
@@ -57,6 +57,7 @@ plt.show()
 
 # Model
 beta = Beta(tf.ones(T - 1), tf.ones(T - 1))
+# beta = Beta(tf.ones(T), tf.ones(T))
 
 # sns.distplot(beta.sample(1000).eval()[:, 0])
 # plt.show()
@@ -104,8 +105,9 @@ plt.show()
 # Inference with KLqp - getting nans
 qalpha = Gamma(tf.Variable(1.0), tf.Variable(1.0))
 qbeta = Beta(tf.ones([T - 1]), tf.nn.softplus(tf.Variable(tf.ones([T - 1]))))
+# qbeta = Beta(tf.ones([T]), tf.nn.softplus(tf.Variable(tf.ones([T]))))
 
-m = np.array([[10.0, 10.0], [0.0, 0.0], [-10.0, -10.0]]).astype('float32')
+m = np.array([[-15.0, -10.0], [5.0, 0.0], [20.0, 20.0]]).astype('float32')
 
 qmu = Normal(tf.Variable(m),
              tf.nn.softplus(tf.Variable(tf.zeros([K, D]))))
@@ -116,18 +118,20 @@ qsigmasq = InverseGamma(tf.Variable(tf.zeros([K, D])), tf.Variable(tf.zeros([K, 
 # qbeta = Beta(tf.nn.softplus(tf.Variable(tf.random_normal([T - 1]))),
              # tf.nn.softplus(tf.Variable(tf.random_normal([T - 1]))))
 
-inference = ed.KLqp({mu: qmu}, data={x: x_train})
-inference = ed.KLqp({mu: qmu, z: qz}, data={x: x_train})
+# inference = ed.KLqp({mu: qmu}, data={x: x_train})
+# inference = ed.KLqp({mu: qmu, z: qz}, data={x: x_train})
+
 inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta}, data={x: x_train})
-inference = ed.KLqp({mu: qmu, beta: qbeta}, data={x: x_train})
+# inference = ed.KLqp({mu: qmu, beta: qbeta}, data={x: x_train})
 
+# inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta, sigmasq: qsigmasq}, data={x: x_train})
 
-inference = ed.KLqp({beta: qbeta, mu: qmu, z: qz, sigmasq: qsigmasq}, data={x: x_train})
-inference = ed.KLqp({beta: qbeta, mu: qmu}, data={x: x_train})
-inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta, alpha: qalpha}, data={x: x_train})
-inference = ed.KLqp({mu: qmu, z: qz, alpha: qalpha}, data={x: x_train})
+# inference = ed.KLqp({beta: qbeta, mu: qmu, z: qz, sigmasq: qsigmasq}, data={x: x_train})
+# inference = ed.KLqp({beta: qbeta, mu: qmu}, data={x: x_train})
+# inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta, alpha: qalpha}, data={x: x_train})
+# inference = ed.KLqp({mu: qmu, z: qz, alpha: qalpha}, data={x: x_train})
 
-inference.initialize(n_samples=5, n_iter=20000, n_print=25)
+inference.initialize(n_samples=3, n_iter=20000, n_print=50)
 
 sess = ed.get_session()
 init = tf.global_variables_initializer()
