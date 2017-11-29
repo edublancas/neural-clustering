@@ -1,4 +1,5 @@
 # notebooks
+numpy
 scipy
 tensorflow
 edward
@@ -6,7 +7,7 @@ pyyaml
 jupyter
 matplotlib
 tabulate
-yass==0.1.1
+yass-algorithm==0.1.1
 
 
 # testing
