@@ -3,7 +3,13 @@ Truncated DPMM using Edward.
 
 It's been several attempts to implement truncated DPMM on Edward but there are
 many problems. First, inference cannot properly be made with MCMC since Edward
-is missing some parts regarding the Categorical distribution.
+throws this error when trying to make inference:
+
+ValueError: 'transform' does not handle supports of type 'categorical'
+
+Gibbs throws a different error:
+
+NotImplementedError: Conditional distribution has sufficient statistics (...)
 
 Seems like the only options is to use variational inference. Here I am using
 KLqp, I bumped into several errors which have already been reported in
@@ -17,6 +23,9 @@ http://edwardlib.org/tutorials/unsupervised
 http://docs.pymc.io/notebooks/dp_mix.html
 https://discourse.edwardlib.org/t/dpm-model-for-clustering/97/6
 https://discourse.edwardlib.org/t/variational-inference-for-dirichlet-process-mixtures/251
+
+Cannot use MetropolisHastings
+https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian_mh.py
 """
 from edward.models import (Normal, MultivariateNormalDiag, Beta,
                            InverseGamma,  ParamMixture, Empirical,
@@ -57,48 +66,33 @@ ed.set_seed(0)
 
 N = 500
 D = 2
-T = K = 3  # truncation level
+K = 3
+T = 2  # truncation
+
+sess = ed.get_session()
 
 x_train = build_toy_dataset(N)
 
 # plot toy dataset
-plt.scatter(x_train[:, 0], x_train[:, 1])
-sns.jointplot(x_train[:, 0], x_train[:, 1], kind='kde')
+sns.jointplot(x_train[:, 0], x_train[:, 1], kind='scatter')
 plt.show()
 
+
 # Model
-beta = Beta(tf.ones(T - 1), tf.ones(T - 1))
-# beta = Beta(tf.ones(T), tf.ones(T))
+beta = Beta(tf.ones(T), tf.ones(T))
 
-# sns.distplot(beta.sample(1000).eval()[:, 0])
-# plt.show()
-
-
-# sns.distplot(Beta(1.0, 1.0).sample(100).eval())
-# plt.show()
-
-# alpha = Gamma(1.0, 1.0)
-# beta = Beta(tf.ones(T - 1), tf.ones(T - 1) * alpha)
-# beta
-
-# s = beta.sample(1)[0, :]
-# stick_breaking(s).eval()
+# alpha = Gamma(tf.ones(T), tf.ones(T))
+# beta = Beta(tf.ones(T), alpha)
 
 pi = stick_breaking(beta)
-pi
 
 mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
 mu
 
 # m = np.array([[10.0, 10.0], [0.0, 0.0], [-10.0, -10.0]]).astype('float32')
 # mu = Normal(m, tf.ones((K, D)))
-# mu
 
 # sigmasq = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
-# sigmasq
-# sigmasq = InverseGamma(tf.ones((K, D)), tf.ones((K, D)))
-# sigmasq
-
 sigmasq = tf.ones((K, D))
 
 # pi = tf.constant([0.39, 0.01, 0.60])
@@ -107,33 +101,29 @@ x = ParamMixture(pi, {'loc': mu, 'scale_diag': tf.sqrt(sigmasq)},
                  sample_shape=N)
 z = x.cat
 
-# original model
+# plot prior
 x_original = x.sample(500).eval()
 sns.jointplot(x_original[:, 0], x_original[:, 1], kind='kde')
 plt.show()
 
 
-# Inference with KLqp - getting nans
-qalpha = Gamma(tf.Variable(1.0), tf.Variable(1.0))
-qbeta = Beta(tf.ones([T - 1]), tf.nn.softplus(tf.Variable(tf.ones([T - 1]))))
-# qbeta = Beta(tf.ones([T]), tf.nn.softplus(tf.Variable(tf.ones([T]))))
+# Inference with KLqp
+# qalpha = Gamma(tf.Variable(1.0), tf.Variable(1.0))
+# qsigmasq = InverseGamma(tf.Variable(tf.zeros([K, D])), tf.Variable(tf.zeros([K, D])))
+
+qbeta = Beta(tf.ones([T]), tf.nn.softplus(tf.Variable(tf.ones([T]))))
 
 m = np.array([[-15.0, -10.0], [5.0, 0.0], [20.0, 20.0]]).astype('float32')
-
 qmu = Normal(tf.Variable(m),
              tf.nn.softplus(tf.Variable(tf.zeros([K, D]))))
+
 qz = Categorical(tf.nn.softmax(tf.Variable(tf.zeros([N, K]))))
-qsigmasq = InverseGamma(tf.Variable(tf.zeros([K, D])), tf.Variable(tf.zeros([K, D])))
 
 
-# qbeta = Beta(tf.nn.softplus(tf.Variable(tf.random_normal([T - 1]))),
-             # tf.nn.softplus(tf.Variable(tf.random_normal([T - 1]))))
-
-# inference = ed.KLqp({mu: qmu}, data={x: x_train})
-# inference = ed.KLqp({mu: qmu, z: qz}, data={x: x_train})
+inference = ed.KLqp({mu: qmu, z: qz}, data={x: x_train})
 
 inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta}, data={x: x_train})
-# inference = ed.KLqp({mu: qmu, beta: qbeta}, data={x: x_train})
+inference = ed.KLqp({mu: qmu, beta: qbeta}, data={x: x_train})
 
 # inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta, sigmasq: qsigmasq}, data={x: x_train})
 
@@ -142,9 +132,8 @@ inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta}, data={x: x_train})
 # inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta, alpha: qalpha}, data={x: x_train})
 # inference = ed.KLqp({mu: qmu, z: qz, alpha: qalpha}, data={x: x_train})
 
-inference.initialize(n_samples=3, n_iter=20000, n_print=50)
+inference.initialize(n_samples=3, n_iter=5000, n_print=100)
 
-sess = ed.get_session()
 init = tf.global_variables_initializer()
 init.run()
 
@@ -158,59 +147,8 @@ for _ in range(inference.n_iter):
     if t % inference.n_print == 0:
         print("Inferred cluster means:")
         print(sess.run(qmu.mean()))
-
-
-# Inference with HMC - works (SGLD also works)
-S = 5000
-
-qmu = Empirical(tf.Variable(tf.zeros([S, K, D])))
-# qbeta = Empirical(tf.Variable(tf.zeros([S, K])))
-qalpha = Empirical(tf.Variable(tf.ones(S)))
-qz = Empirical(tf.Variable(tf.zeros([S, N], dtype=tf.int32)))
-
-# inference = ed.SGLD({alpha: qalpha, mu: qmu}, data={x: x_train})
-# inference = ed.SGLD({beta: qbeta, mu: qmu}, data={x: x_train})
-
-# inference = ed.Gibbs({mu: qmu, z: qz}, data={x: x_train})
-inference = ed.SGLD({alpha: qalpha, mu: qmu, z: qz}, data={x: x_train})
-
-
-# galpha = Gamma(1.0, 1.0)
-# gmu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
-# gz = Categorical(tf.zeros([N, K]))
-
-# nope https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian_mh.py
-# inference = ed.MetropolisHastings(latent_vars={alpha: qalpha, mu: qmu, z: qz},
-#                                   proposal_vars={alpha: galpha, mu: gmu, z: gz},
-#                                   data={x: x_train})
-
-# inference = ed.MetropolisHastings(latent_vars={mu: qmu, z: qz},
-#                                   proposal_vars={mu: gmu, z: gz},
-#                                   data={x: x_train})
-
-
-inference.initialize()
-
-sess = ed.get_session()
-init = tf.global_variables_initializer()
-init.run()
-
-
-t_ph = tf.placeholder(tf.int32, [])
-running_cluster_means = tf.reduce_mean(qmu.params[:t_ph], 0)
-
-for _ in range(inference.n_iter):
-    info_dict = inference.update()
-    inference.print_progress(info_dict)
-    t = info_dict['t']
-
-    if t % inference.n_print == 0:
-        print("\nInferred cluster means:")
-        print(sess.run(running_cluster_means, {t_ph: t - 1}))
-
-
-# inference.run(step_size=0.1, n_steps=2)
-inference.run()
+        print("Beta")
+        print(qbeta.concentration0.eval())
 
 # Criticism
 
