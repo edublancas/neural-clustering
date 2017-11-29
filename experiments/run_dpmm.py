@@ -4,6 +4,7 @@ Run a DPMM experiment
 import os
 
 import numpy as np
+
 from neural_clustering import config
 from neural_clustering.model import dpmm
 
@@ -11,7 +12,6 @@ TRUNCATION_LEVEL = 10
 ITERATIONS = 50000
 
 cfg = config.load('config.yaml')
-cfg = config.load('server_config.yaml')
 
 path = os.path.join(cfg['root'], 'training.npy')
 
