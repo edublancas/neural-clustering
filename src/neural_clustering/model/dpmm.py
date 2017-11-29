@@ -3,7 +3,7 @@ from datetime import datetime
 import logging
 
 from edward.models import (Normal, MultivariateNormalDiag, Beta,
-                           Gamma,  ParamMixture, Empirical, Categorical)
+                           ParamMixture, Categorical)
 import edward as ed
 import tensorflow as tf
 import numpy as np
@@ -42,7 +42,7 @@ def fit(x_train, truncation_level, cfg, inference_alg=ed.KLqp,
     pi = stick_breaking(beta)
 
     mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
-    sigmasq = Gamma(tf.ones(D), tf.ones(D), sample_shape=K)
+    sigmasq = tf.ones((K, D))
 
     # joint model
     x = ParamMixture(pi, {'loc': mu, 'scale_diag': tf.sqrt(sigmasq)},
@@ -66,18 +66,7 @@ def fit(x_train, truncation_level, cfg, inference_alg=ed.KLqp,
     init = tf.global_variables_initializer()
     init.run()
 
-    # inference.run()
-    for _ in range(inference.n_iter):
-        info_dict = inference.update()
-        inference.print_progress(info_dict)
-
-        t = info_dict['t']
-
-        if t % inference.n_print == 0:
-            print("Inferred cluster means:")
-            print(sess.run(qmu.mean()))
-            print("Beta")
-            print(qbeta.concentration0.eval())
+    inference.run()
 
     # Save results
     saver = tf.train.Saver()

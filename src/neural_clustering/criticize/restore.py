@@ -2,7 +2,7 @@ from ..model.dpmm import stick_breaking
 
 import edward as ed
 from edward.models import (Empirical, ParamMixture, MultivariateNormalDiag,
-                           Gamma, Beta, Normal, Categorical)
+                           Beta, Normal, Categorical)
 import tensorflow as tf
 import numpy as np
 
@@ -30,6 +30,8 @@ def experiment(cfg, session_name):
 def dpmm(cfg, session_name):
     """Restores a DPMM session
     """
+    # tf.reset_default_graph()
+
     path_to_session = os.path.join(cfg['root'],
                                    'sessions/{}'.format(session_name),
                                    'session.ckpt')
@@ -47,26 +49,23 @@ def dpmm(cfg, session_name):
     with open(path_to_params) as f:
         params = yaml.load(f)
 
-    tf.reset_default_graph()
-
     N, D = x_train.shape
     K = params['truncation_level']
     T = K - 1
 
-    sigmasq = Gamma(tf.ones(D), tf.ones(D), sample_shape=K)
+    sigmasq = tf.ones((K, D))
 
     qbeta = Beta(tf.ones([T]), tf.nn.softplus(tf.Variable(tf.ones([T]))))
     qmu = Normal(tf.Variable(tf.zeros([K, D])), tf.ones([K, D]))
     qz = Categorical(tf.nn.softmax(tf.Variable(tf.zeros([N, K]))))
-
     qpi = stick_breaking(qbeta)
-
-    x_pred = ParamMixture(qpi, {'loc': qmu, 'scale_diag': tf.sqrt(sigmasq)},
-                          MultivariateNormalDiag, sample_shape=N)
 
     saver = tf.train.Saver()
     sess = ed.get_session()
     saver.restore(sess, path_to_session)
+
+    x_pred = ParamMixture(qpi, {'loc': qmu, 'scale_diag': tf.sqrt(sigmasq)},
+                          MultivariateNormalDiag, sample_shape=N)
 
     return dict(sigmasq=sigmasq, qz=qz, qmu=qmu, qbeta=qbeta,
                 x_train=x_train, params=params, x_pred=x_pred)

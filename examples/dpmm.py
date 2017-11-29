@@ -100,8 +100,8 @@ mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
 # m = np.array([[-15.0, -10.0], [5.0, 0.0], [20.0, 20.0]]).astype('float32')
 # mu = Normal(m, tf.ones((K, D)))
 
-sigmasq = Gamma(tf.ones(D), tf.ones(D), sample_shape=K)
-# sigmasq = tf.ones((K, D))
+# sigmasq = Gamma(tf.ones(D), tf.ones(D), sample_shape=K)
+sigmasq = tf.ones((K, D))
 
 # joint model
 x = ParamMixture(pi, {'loc': mu, 'scale_diag': tf.sqrt(sigmasq)},
@@ -136,9 +136,10 @@ inference = ed.KLqp({mu: qmu, alpha: qalpha}, data={x: x_train})
 
 inference = ed.KLqp({mu: qmu, z: qz, alpha: qalpha}, data={x: x_train})
 
-inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta},
-                    data={x: x_train})
 inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta, sigmasq: qsigmasq},
+                    data={x: x_train})
+
+inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta},
                     data={x: x_train})
 
 inference.initialize(n_samples=3, n_iter=5000, n_print=100)
