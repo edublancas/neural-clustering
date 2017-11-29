@@ -74,7 +74,7 @@ ed.set_seed(0)
 N = 500
 D = 2
 K = 3
-T = 2  # truncation
+T = 2
 
 sess = ed.get_session()
 
@@ -100,8 +100,8 @@ mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
 # m = np.array([[-15.0, -10.0], [5.0, 0.0], [20.0, 20.0]]).astype('float32')
 # mu = Normal(m, tf.ones((K, D)))
 
-# sigmasq = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
-sigmasq = tf.ones((K, D))
+sigmasq = Gamma(tf.ones(D), tf.ones(D), sample_shape=K)
+# sigmasq = tf.ones((K, D))
 
 # joint model
 x = ParamMixture(pi, {'loc': mu, 'scale_diag': tf.sqrt(sigmasq)},
@@ -122,12 +122,10 @@ sns.jointplot(x_original[:, 0], x_original[:, 1], kind='kde')
 plt.show()
 
 # Inference with KLqp
-# qsigmasq = InverseGamma(tf.Variable(tf.zeros([K, D])),
-#                         tf.Variable(tf.zeros([K, D])))
+qsigmasq = Gamma(tf.Variable(tf.zeros([K, D])),
+                 tf.Variable(tf.zeros([K, D])))
 qalpha = Gamma(tf.Variable(tf.ones(T)), tf.Variable(tf.ones(T)))
 qbeta = Beta(tf.ones([T]), tf.nn.softplus(tf.Variable(tf.ones([T]))))
-
-# m = np.array([[-15.0, -10.0], [5.0, 0.0], [20.0, 20.0]]).astype('float32')
 qmu = Normal(tf.Variable(tf.zeros([K, D])), tf.ones([K, D]))
 qz = Categorical(tf.nn.softmax(tf.Variable(tf.zeros([N, K]))))
 
@@ -136,8 +134,10 @@ inference = ed.KLqp({mu: qmu}, data={x: x_train})
 inference = ed.KLqp({mu: qmu, beta: qbeta}, data={x: x_train})
 inference = ed.KLqp({mu: qmu, alpha: qalpha}, data={x: x_train})
 
-inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta}, data={x: x_train})
 inference = ed.KLqp({mu: qmu, z: qz, alpha: qalpha}, data={x: x_train})
+
+inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta, sigmasq: qsigmasq},
+                    data={x: x_train})
 
 inference.initialize(n_samples=3, n_iter=5000, n_print=100)
 

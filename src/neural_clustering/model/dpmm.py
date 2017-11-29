@@ -3,7 +3,7 @@ from datetime import datetime
 import logging
 
 from edward.models import (Normal, MultivariateNormalDiag, Beta,
-                           InverseGamma,  ParamMixture, Empirical)
+                           Gamma,  ParamMixture, Empirical, Categorical)
 import edward as ed
 import tensorflow as tf
 import numpy as np
@@ -17,41 +17,47 @@ logger = logging.getLogger(__name__)
 
 def stick_breaking(v):
     remaining_pieces = tf.concat([tf.ones(1), tf.cumprod(1.0 - v)[:-1]], 0)
-    return v * remaining_pieces
+    weights = v * remaining_pieces
+    return tf.concat([weights, [1.0 - tf.reduce_sum(weights)]], axis=0)
 
 
-def fit(x_train, truncation_level, cfg, samples=10000,
-        inference_alg=ed.HMC, inference_params=None):
-    """Fit a truncated DPMM model with Edward
+def fit(x_train, truncation_level, cfg, inference_alg=ed.KLqp,
+        inference_params=None):
+    """Fit a truncated DPMM model with Edward using Variational Inference
 
     Notes
     -----
-    Only tested with HMC and SGLD
+    Only tested with KLqp
     """
     # tf.reset_default_graph()
 
     inference_name = inference_alg.__name__
 
     N, D = x_train.shape
-    T = K = truncation_level
+    K = truncation_level
+    T = K - 1
 
     # Model
     beta = Beta(tf.ones(T), tf.ones(T))
     pi = stick_breaking(beta)
 
     mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
-    sigmasq = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
+    sigmasq = Gamma(tf.ones(D), tf.ones(D), sample_shape=K)
 
+    # joint model
     x = ParamMixture(pi, {'loc': mu, 'scale_diag': tf.sqrt(sigmasq)},
                      MultivariateNormalDiag,
                      sample_shape=N)
+    z = x.cat
 
-    S = samples
+    qsigmasq = Gamma(tf.Variable(tf.zeros([K, D])),
+                     tf.Variable(tf.zeros([K, D])))
+    qbeta = Beta(tf.ones([T]), tf.nn.softplus(tf.Variable(tf.ones([T]))))
+    qmu = Normal(tf.Variable(tf.zeros([K, D])), tf.ones([K, D]))
+    qz = Categorical(tf.nn.softmax(tf.Variable(tf.zeros([N, K]))))
 
-    qmu = Empirical(tf.Variable(tf.zeros([S, K, D])))
-    qbeta = Empirical(tf.Variable(tf.zeros([S, K])))
-
-    inference = inference_alg({beta: qbeta, mu: qmu}, data={x: x_train})
+    inference = inference_alg({mu: qmu, z: qz, beta: qbeta, sigmasq: qsigmasq},
+                              data={x: x_train})
 
     if inference_params:
         inference.initialize(**inference_params)
@@ -83,7 +89,7 @@ def fit(x_train, truncation_level, cfg, samples=10000,
     params = dict(model_type='DPMM',
                   truncation_level=truncation_level,
                   inference_algoritm=inference_name,
-                  samples=samples, inference_params=inference_params,
+                  inference_params=inference_params,
                   timestamp=timestamp.isoformat(),
                   git_hash=get_commit_hash(),
                   name=directory_name)
