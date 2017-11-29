@@ -50,13 +50,11 @@ def fit(x_train, truncation_level, cfg, inference_alg=ed.KLqp,
                      sample_shape=N)
     z = x.cat
 
-    qsigmasq = Gamma(tf.Variable(tf.zeros([K, D])),
-                     tf.Variable(tf.zeros([K, D])))
     qbeta = Beta(tf.ones([T]), tf.nn.softplus(tf.Variable(tf.ones([T]))))
     qmu = Normal(tf.Variable(tf.zeros([K, D])), tf.ones([K, D]))
     qz = Categorical(tf.nn.softmax(tf.Variable(tf.zeros([N, K]))))
 
-    inference = inference_alg({mu: qmu, z: qz, beta: qbeta, sigmasq: qsigmasq},
+    inference = inference_alg({mu: qmu, z: qz, beta: qbeta},
                               data={x: x_train})
 
     if inference_params:
@@ -68,7 +66,18 @@ def fit(x_train, truncation_level, cfg, inference_alg=ed.KLqp,
     init = tf.global_variables_initializer()
     init.run()
 
-    inference.run()
+    # inference.run()
+    for _ in range(inference.n_iter):
+        info_dict = inference.update()
+        inference.print_progress(info_dict)
+
+        t = info_dict['t']
+
+        if t % inference.n_print == 0:
+            print("Inferred cluster means:")
+            print(sess.run(qmu.mean()))
+            print("Beta")
+            print(qbeta.concentration0.eval())
 
     # Save results
     saver = tf.train.Saver()

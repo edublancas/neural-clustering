@@ -53,22 +53,22 @@ def dpmm(cfg, session_name):
     K = params['truncation_level']
     T = K - 1
 
-    qsigmasq = Gamma(tf.Variable(tf.zeros([K, D])),
-                     tf.Variable(tf.zeros([K, D])))
+    sigmasq = Gamma(tf.ones(D), tf.ones(D), sample_shape=K)
+
     qbeta = Beta(tf.ones([T]), tf.nn.softplus(tf.Variable(tf.ones([T]))))
     qmu = Normal(tf.Variable(tf.zeros([K, D])), tf.ones([K, D]))
     qz = Categorical(tf.nn.softmax(tf.Variable(tf.zeros([N, K]))))
 
     qpi = stick_breaking(qbeta)
 
-    x_pred = ParamMixture(qpi, {'loc': qmu, 'scale_diag': tf.sqrt(qsigmasq)},
+    x_pred = ParamMixture(qpi, {'loc': qmu, 'scale_diag': tf.sqrt(sigmasq)},
                           MultivariateNormalDiag, sample_shape=N)
 
     saver = tf.train.Saver()
     sess = ed.get_session()
     saver.restore(sess, path_to_session)
 
-    return dict(qsigmasq=qsigmasq, qz=qz, qmu=qmu, qbeta=qbeta,
+    return dict(sigmasq=sigmasq, qz=qz, qmu=qmu, qbeta=qbeta,
                 x_train=x_train, params=params, x_pred=x_pred)
 
 

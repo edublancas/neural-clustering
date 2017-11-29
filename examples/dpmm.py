@@ -136,6 +136,8 @@ inference = ed.KLqp({mu: qmu, alpha: qalpha}, data={x: x_train})
 
 inference = ed.KLqp({mu: qmu, z: qz, alpha: qalpha}, data={x: x_train})
 
+inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta},
+                    data={x: x_train})
 inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta, sigmasq: qsigmasq},
                     data={x: x_train})
 
