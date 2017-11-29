@@ -14,21 +14,21 @@ Machine Learning with Probabilistic Programming, Columbia University, Fall 2017.
 * config.yaml and server_config.yaml - Project configuration file
 * count - Script for counting the length of the notebooks
 
-## Installing requirements
+## Step 1: Install requirements
 
 ```shell
 # clone repo
 git clone https://github.com/edublancas/neural-clustering
 
-# install command line tools and other functions
+# install package
 cd neural-noise
 pip install .
 
-# install notebooks/ dependencies
+# install other dependencies
 pip install -r requirements.txt
 ```
 
-## Step 0: Code linting and notebooks length
+## Step 2: Code linting and notebooks length
 
 Checking code passes flake8:
 
@@ -42,10 +42,13 @@ Counting jupyter notebooks length:
 ./count
 ```
 
-## Step 1: Run YASS pipeline
 
-The first step is to run YASS to generate the necessary
-files for the clustering and visualization notebooks.
+## Step 3: YASS setup
+
+
+## Step 4: Run YASS pipeline
+
+Run YASS to generate the necessary files for the clustering and visualization notebooks.
 
 ```shell
 # run yass pipeline to process neural data
@@ -55,7 +58,7 @@ run_yass yass_config/local_7ch.yaml config.yaml
 # the training data for the clustering algorithm
 ```
 
-## Step 2: Run notebooks
+## Step 5: Run notebooks
 
 Once input files are generated, start `jupyter` and take a look at the
 files located in  `notebooks/`
