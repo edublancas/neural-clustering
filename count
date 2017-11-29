@@ -1,22 +1,33 @@
 #!/usr/bin/env bash
 
+echo 'Copying notebooks/ to tmp/'
+mkdir tmp
+cp notebooks/* tmp/
+
 # strip notebooks
 echo 'Stripping notebooks...'
-./strip_nb notebooks/1-intro.ipynb
-./strip_nb notebooks/2-data-loading.ipynb
-./strip_nb notebooks/3-dpmm-v1.ipynb
-./strip_nb notebooks/4-criticism.ipynb
+./strip_nb tmp/1-intro.ipynb
+./strip_nb tmp/2-data-loading.ipynb
+./strip_nb tmp/3-model-fit-and-experiments.ipynb
+./strip_nb tmp/4-1-model-criticism-GMM.ipynb
+./strip_nb tmp/4-2-model-criticism-DPMM.ipynb
+./strip_nb tmp/5-clustering-visualization.ipynb
+./strip_nb tmp/6-conclusions.ipynb
 
 # convert notebooks to md
 echo 'Converting notebooks to markdown...'
-jupyter-nbconvert --to markdown notebooks/1-intro.ipynb
-jupyter-nbconvert --to markdown notebooks/2-data-loading.ipynb
-jupyter-nbconvert --to markdown notebooks/3-dpmm-v1.ipynb
-jupyter-nbconvert --to markdown notebooks/4-criticism.ipynb
+jupyter-nbconvert --to markdown tmp/1-intro.ipynb
+jupyter-nbconvert --to markdown tmp/2-data-loading.ipynb
+jupyter-nbconvert --to markdown tmp/3-model-fit-and-experiments.ipynb
+jupyter-nbconvert --to markdown tmp/4-1-model-criticism-GMM.ipynb
+jupyter-nbconvert --to markdown tmp/4-2-model-criticism-DPMM.ipynb
+jupyter-nbconvert --to markdown tmp/5-clustering-visualization.ipynb
+jupyter-nbconvert --to markdown tmp/6-conclusions.ipynb
+
 
 # count words
 echo 'Word count:'
-wc -w notebooks/1-intro.md notebooks/2-data-loading.md notebooks/3-dpmm-v1.md notebooks/4-criticism.md
+wc -w tmp/1-intro.md tmp/2-data-loading.md tmp/3-model-fit-and-experiments.md tmp/4-1-model-criticism-GMM.md tmp/4-2-model-criticism-DPMM.md tmp/5-clustering-visualization.md tmp/6-conclusions.md
 
-echo 'Removing md files...'
-rm -f notebooks/1-intro.md notebooks/2-data-loading.md notebooks/3-dpmm-v1.md notebooks/4-criticism.md
+echo 'Removing tmp/'
+rm -rf tmp/
