@@ -81,13 +81,12 @@ plt.show()
 # Model
 beta = Beta(tf.ones(T), tf.ones(T))
 
-# alpha = Gamma(tf.ones(T), tf.ones(T))
-# beta = Beta(tf.ones(T), alpha)
+alpha = Gamma(tf.ones(T), tf.ones(T))
+beta = Beta(tf.ones(T), alpha)
 
 pi = stick_breaking(beta)
 
 mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
-mu
 
 # m = np.array([[10.0, 10.0], [0.0, 0.0], [-10.0, -10.0]]).astype('float32')
 # mu = Normal(m, tf.ones((K, D)))
@@ -108,8 +107,8 @@ plt.show()
 
 
 # Inference with KLqp
-# qalpha = Gamma(tf.Variable(1.0), tf.Variable(1.0))
 # qsigmasq = InverseGamma(tf.Variable(tf.zeros([K, D])), tf.Variable(tf.zeros([K, D])))
+# qalpha = Gamma(tf.Variable(tf.ones(T)), tf.Variable(tf.ones(T)))
 
 qbeta = Beta(tf.ones([T]), tf.nn.softplus(tf.Variable(tf.ones([T]))))
 
@@ -120,16 +119,7 @@ qmu = Normal(tf.Variable(m),
 qz = Categorical(tf.nn.softmax(tf.Variable(tf.zeros([N, K]))))
 
 
-inference = ed.KLqp({mu: qmu, z: qz}, data={x: x_train})
-
 inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta}, data={x: x_train})
-inference = ed.KLqp({mu: qmu, beta: qbeta}, data={x: x_train})
-
-# inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta, sigmasq: qsigmasq}, data={x: x_train})
-
-# inference = ed.KLqp({beta: qbeta, mu: qmu, z: qz, sigmasq: qsigmasq}, data={x: x_train})
-# inference = ed.KLqp({beta: qbeta, mu: qmu}, data={x: x_train})
-# inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta, alpha: qalpha}, data={x: x_train})
 # inference = ed.KLqp({mu: qmu, z: qz, alpha: qalpha}, data={x: x_train})
 
 inference.initialize(n_samples=3, n_iter=5000, n_print=100)
@@ -149,57 +139,3 @@ for _ in range(inference.n_iter):
         print(sess.run(qmu.mean()))
         print("Beta")
         print(qbeta.concentration0.eval())
-
-# Criticism
-
-# plotting params
-plt.plot(qalpha.params.eval())
-plt.show()
-
-sns.distplot(qalpha.sample(1000).eval())
-plt.show()
-
-# plt.plot(qbeta.params.eval())
-# plt.show()
-
-qmu_params = qmu.params.eval()
-qmu_params[-1:]
-
-plt.plot(qmu_params[:, 2, :])
-plt.show()
-
-
-# posterior predictive
-qbeta = Beta(tf.ones(T - 1), tf.ones(T - 1) * qalpha)
-qpi = stick_breaking(beta)
-x_pred = ParamMixture(pi,
-                      {'loc': qmu, 'scale_diag': tf.sqrt(sigmasq)},
-                      MultivariateNormalDiag,
-                      sample_shape=N)
-
-x_pred_sample = x_pred.sample(500).eval()
-sns.jointplot(x_pred_sample[:, 0], x_pred_sample[:, 1], kind='kde')
-plt.show()
-
-
-SC = 1000
-
-mu_sample = qmu.sample(SC)
-
-x_post = Normal(tf.ones([N, 1, 1, 1]) * mu_sample,
-                tf.ones([N, 1, 1, 1]) * 1.0)
-
-x_broadcasted = tf.tile(tf.reshape(x_train, [N, 1, 1, D]), [1, SC, K, 1])
-
-log_liks = x_post.log_prob(x_broadcasted)
-log_liks = tf.reduce_sum(log_liks, 3)
-log_liks = tf.reduce_mean(log_liks, 1)
-
-clusters = tf.argmax(log_liks, 1).eval()
-
-print('Found {} clusters'.format(len(np.unique(clusters))))
-np.unique(clusters, return_counts=True)
-
-plt.scatter(x_train[:, 0], x_train[:, 1], c=clusters)
-plt.title("Predicted cluster assignments")
-plt.show()
