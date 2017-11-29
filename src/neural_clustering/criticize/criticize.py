@@ -24,8 +24,8 @@ def find_cluster_assignments(x_train, qmu, params):
     K = params.get('truncation_level') or params.get('k')
 
     # http://edwardlib.org/api/ed/MonteCarlo
-    total = 10000
-    burn_in = 4000
+    total = 1000
+    burn_in = 400
     SC = total - burn_in
 
     mu_sample = qmu.sample(total)[burn_in:, :, :]
