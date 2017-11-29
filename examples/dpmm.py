@@ -29,7 +29,7 @@ https://github.com/blei-lab/edward/blob/master/examples/mixture_gaussian_mh.py
 """
 from edward.models import (Normal, MultivariateNormalDiag, Beta,
                            InverseGamma,  ParamMixture, Empirical,
-                           Gamma, Categorical)
+                           Gamma, Categorical, Mixture)
 import edward as ed
 import numpy as np
 import tensorflow as tf
@@ -39,7 +39,7 @@ import seaborn as sns
 
 def build_toy_dataset(N):
     pi = np.array([0.4, 0.6])
-    mus = [[5.0, 5.0], [-5.0, -5.0]]
+    mus = [[30.0, 30.0], [-30.0, -30.0]]
     stds = [[1.0, 1.0], [1.0, 1.0]]
     x = np.zeros((N, 2), dtype=np.float32)
 
@@ -81,14 +81,14 @@ plt.show()
 # Model
 beta = Beta(tf.ones(T), tf.ones(T))
 
-alpha = Gamma(tf.ones(T), tf.ones(T))
-beta = Beta(tf.ones(T), alpha)
+# alpha = Gamma(tf.ones(T), tf.ones(T))
+# beta = Beta(tf.ones(T), alpha)
 
 pi = stick_breaking(beta)
 
 mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
 
-# m = np.array([[10.0, 10.0], [0.0, 0.0], [-10.0, -10.0]]).astype('float32')
+# m = np.array([[-15.0, -10.0], [5.0, 0.0], [20.0, 20.0]]).astype('float32')
 # mu = Normal(m, tf.ones((K, D)))
 
 # sigmasq = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
@@ -106,27 +106,32 @@ sns.jointplot(x_original[:, 0], x_original[:, 1], kind='kde')
 plt.show()
 
 
+# Alternative model
+cat = Categorical(probs=pi, sample_shape=N)
+components = [MultivariateNormalDiag(tf.zeros(D), tf.ones(D), sample_shape=N)
+              for k in range(K)]
+x = Mixture(cat, components, sample_shape=N)
+
 # Inference with KLqp
 # qsigmasq = InverseGamma(tf.Variable(tf.zeros([K, D])), tf.Variable(tf.zeros([K, D])))
 # qalpha = Gamma(tf.Variable(tf.ones(T)), tf.Variable(tf.ones(T)))
 
 qbeta = Beta(tf.ones([T]), tf.nn.softplus(tf.Variable(tf.ones([T]))))
 
-m = np.array([[-15.0, -10.0], [5.0, 0.0], [20.0, 20.0]]).astype('float32')
-qmu = Normal(tf.Variable(m),
-             tf.nn.softplus(tf.Variable(tf.zeros([K, D]))))
+# m = np.array([[-15.0, -10.0], [5.0, 0.0], [20.0, 20.0]]).astype('float32')
+qmu = Normal(tf.Variable(tf.zeros([K, D])), tf.ones([K, D]))
 
 qz = Categorical(tf.nn.softmax(tf.Variable(tf.zeros([N, K]))))
 
 
-inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta}, data={x: x_train})
+inference = ed.KLqp({mu: qmu, beta: qbeta}, data={x: x_train})
+# inference = ed.KLqp({mu: qmu, z: qz, beta: qbeta}, data={x: x_train})
 # inference = ed.KLqp({mu: qmu, z: qz, alpha: qalpha}, data={x: x_train})
 
 inference.initialize(n_samples=3, n_iter=5000, n_print=100)
 
 init = tf.global_variables_initializer()
 init.run()
-
 
 for _ in range(inference.n_iter):
     info_dict = inference.update()
