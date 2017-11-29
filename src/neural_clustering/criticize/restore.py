@@ -1,5 +1,8 @@
+from ..model.dpmm import stick_breaking
+
 import edward as ed
-from edward.models import Empirical, ParamMixture, MultivariateNormalDiag
+from edward.models import (Empirical, ParamMixture, MultivariateNormalDiag,
+                           Gamma, Beta, Normal, Categorical)
 import tensorflow as tf
 import numpy as np
 
@@ -26,13 +29,6 @@ def experiment(cfg, session_name):
 
 def dpmm(cfg, session_name):
     """Restores a DPMM session
-
-    Returns
-    -------
-    qmu
-    qbeta
-    x_train
-    params
     """
     path_to_session = os.path.join(cfg['root'],
                                    'sessions/{}'.format(session_name),
@@ -53,29 +49,31 @@ def dpmm(cfg, session_name):
 
     tf.reset_default_graph()
 
-    _, D = x_train.shape
+    N, D = x_train.shape
     K = params['truncation_level']
-    S = params['samples']
+    T = K - 1
 
-    qmu = Empirical(tf.Variable(tf.zeros([S, K, D])))
-    qbeta = Empirical(tf.Variable(tf.zeros([S, K])))
+    qsigmasq = Gamma(tf.Variable(tf.zeros([K, D])),
+                     tf.Variable(tf.zeros([K, D])))
+    qbeta = Beta(tf.ones([T]), tf.nn.softplus(tf.Variable(tf.ones([T]))))
+    qmu = Normal(tf.Variable(tf.zeros([K, D])), tf.ones([K, D]))
+    qz = Categorical(tf.nn.softmax(tf.Variable(tf.zeros([N, K]))))
+
+    qpi = stick_breaking(qbeta)
+
+    x_pred = ParamMixture(qpi, {'loc': qmu, 'scale_diag': tf.sqrt(qsigmasq)},
+                          MultivariateNormalDiag, sample_shape=N)
 
     saver = tf.train.Saver()
     sess = ed.get_session()
     saver.restore(sess, path_to_session)
 
-    return dict(qmu=qmu, qbeta=qbeta, x_train=x_train, params=params)
+    return dict(qsigmasq=qsigmasq, qz=qz, qmu=qmu, qbeta=qbeta,
+                x_train=x_train, params=params, x_pred=x_pred)
 
 
 def gmm(cfg, session_name):
     """Restores a GMM session
-
-    Returns
-    -------
-    qmu
-    qbeta
-    x_train
-    params
     """
     path_to_session = os.path.join(cfg['root'],
                                    'sessions/{}'.format(session_name),
