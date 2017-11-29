@@ -56,7 +56,7 @@ setup(
     ],
     install_requires=REQUIRED,
     entry_points={
-        'console_scripts': ['run_yass=neural_noise.command_line'
+        'console_scripts': ['run_yass=neural_clustering.command_line'
                             ':run_yass'],
     },
 )

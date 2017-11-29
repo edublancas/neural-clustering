@@ -1,6 +1,4 @@
-# Neural clustering project
-
-Neural Clustering project.
+# Neural clustering
 
 Machine Learning with Probabilistic Programming, Columbia University, Fall 2017.
 
@@ -45,23 +43,42 @@ Counting jupyter notebooks length:
 
 ## Step 3: YASS setup
 
+*Get data and configure YASS:*
+
+Get `7ch.bin` and `geometry.txt`.
+
+Open `yass_config/demo.yaml` and update `root` with the path where `7ch.bin` and `geometry.txt` are located so YASS can load and process the data.
+
+*Configure neural-clustering pacakge:*
+
+Update `root` in `config.yaml` with an aribitrary folder, this the place where all the output from the pipeline will be stored.
 
 ## Step 4: Run YASS pipeline
 
 Run YASS to generate the necessary files for the clustering and visualization notebooks.
 
 ```shell
-# run yass pipeline to process neural data
+# run yass pipeline to process neural data, this will the entire pipeline
+# since right know, there is no way to just run the detection step, but we
+# will only use the detected spikes for clustering
 run_yass yass_config/local_7ch.yaml config.yaml
 
-# this will process the neural recordings to generate
-# the training data for the clustering algorithm
+# when the command is done there is going to be a folder in {root}/yass
+# where root is the root folder in the config.yaml file
 ```
 
 ## Step 5: Run notebooks
 
 Once input files are generated, start `jupyter` and take a look at the
 files located in  `notebooks/`
+
+Notebooks overview:
+
+1. Intro - Brief introduction to spike sorting
+2. Data loading - Explanation of the data we are working with
+3. Model fit and experiments listing - Example of how to fit models, it also includes a listing of the current experiments
+4. Model criticism (there is one notebook for GMM and another for DPMM) - Checking convergence (only for GMM) and PPC plots
+5. Clustering evaluation - Plots to evaluate the clustering results
 
 ```shell
 jupyter notebook
