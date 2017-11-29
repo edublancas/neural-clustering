@@ -9,9 +9,9 @@ from neural_clustering import config
 from neural_clustering.model import gmm
 
 K = 20
-ITERATIONS = 50000
+ITERATIONS = 10000
 
-cfg = config.load('config.yaml')
+cfg = config.load('server_config.yaml')
 
 path = os.path.join(cfg['root'], 'training.npy')
 
