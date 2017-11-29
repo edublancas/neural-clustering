@@ -28,6 +28,13 @@ def run_yass():
 
     yass.set_config(args.yass_config)
 
+    CONFIG = yass.read_config()
+
+    path_to_tmp = os.path.join(CONFIG.root, 'tmp')
+
+    if not os.path.exists(path_to_tmp):
+        os.makedirs(path_to_tmp)
+
     score, clear_index, spike_times = preprocess.run()
 
     spike_train, spike_left, templates = process.run(score, clear_index,
