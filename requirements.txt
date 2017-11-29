@@ -1,12 +1,15 @@
+# notebooks
 scipy
+tensorflow
 edward
 pyyaml
 jupyter
 matplotlib
-# yass
-# tensorflow
 tabulate
+yass==0.1.1
 
 
-# flake8
+# testing
+pytest
+flake8
 pytest-flake8
