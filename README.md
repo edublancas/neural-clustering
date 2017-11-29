@@ -79,6 +79,7 @@ Notebooks overview:
 3. Model fit and experiments listing - Example of how to fit models, it also includes a listing of the current experiments
 4. Model criticism (there is one notebook for GMM and another for DPMM) - Checking convergence (only for GMM) and PPC plots
 5. Clustering evaluation - Plots to evaluate the clustering results
+6. Conclusions
 
 ```shell
 jupyter notebook

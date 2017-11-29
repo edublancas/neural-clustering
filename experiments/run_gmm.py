@@ -7,7 +7,7 @@ import numpy as np
 from neural_clustering import config
 from neural_clustering.model import gmm
 
-K = 10
+K = 20
 ITERATIONS = 50000
 
 cfg = config.load('config.yaml')
