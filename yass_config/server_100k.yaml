@@ -1,6 +1,6 @@
 # DATA FILES
 # data root folder
-root: /ssd/data/eduardo
+root: /ssd/data/eduardo/yass
 # binary recording filename
 filename: sample_100k.bin
 # channel geometry file name
