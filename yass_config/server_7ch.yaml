@@ -1,14 +1,12 @@
-# SAMPLE CONFIGURATION FILE
-
 # DATA FILES
 # data root folder
-root: /Users/Edu/data/yass
+root: /ssd/data/eduardo
 # binary recording filename
-filename: ej49_data1_set1.bin
+filename: 7ch.bin
 # channel geometry file name
-geomFile: ej49_geometry1.txt
+geomFile: geometry.txt
 # save spikeTrain
-spikeTrainName: ej49_spikeTrain.csv
+spikeTrainName: ej49_spikeTrain1_1.csv
 
 # RECORDING
 # precision of the recording (e.g.'int16')
@@ -16,7 +14,7 @@ dtype: int16
 # recording rate (in Hz)
 srate: 20000
 # number of channels in the recording
-nChan: 49
+nChan: 7
 # spatial radius of spikes
 spatialRadius: 70
 
