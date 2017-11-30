@@ -2,6 +2,11 @@
 Run a truncated DPMM experiment
 
 Restart the Python session before running another experiment
+
+There is a bug in Edward that *sometimes* throws an error when fitting, it
+occurs more often with truncation levels > 5 more on that here:
+https://discourse.edwardlib.org/t/variational-inference-for-dirichlet-process-mixtures/251/2
+# noqa
 """
 import os
 
@@ -10,9 +15,8 @@ import numpy as np
 from neural_clustering import config
 from neural_clustering.model import dpmm
 
-# seems like there is a bug in edward that throws an error when truncation
-# level > 5
-TRUNCATION_LEVEL = 3
+
+TRUNCATION_LEVEL = 10
 ITERATIONS = 50000
 N_SAMPLES = 3
 
