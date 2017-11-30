@@ -37,3 +37,13 @@ def summarize_experiments(cfg):
     header = list(set([item for sublist in all_keys for item in sublist]))
     content = [[p.get(h) for h in header] for p in params]
     return Table(content, header)
+
+
+def summarize_experiment(cfg, name):
+    """Summarizes a single experiment
+    """
+    params = [p for p in load_experiments_params(cfg) if p['name'] == name]
+    all_keys = [list(p.keys()) for p in params]
+    header = list(set([item for sublist in all_keys for item in sublist]))
+    content = [[p.get(h) for h in header] for p in params]
+    return Table(content, header)
