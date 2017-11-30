@@ -1,5 +1,7 @@
 """
 Run a truncated DPMM experiment
+
+Restart the Python session before running another experiment
 """
 import os
 
@@ -10,7 +12,7 @@ from neural_clustering.model import dpmm
 
 # seems like there is a bug in edward that throws an error when truncation
 # level > 5
-TRUNCATION_LEVEL = 5
+TRUNCATION_LEVEL = 3
 ITERATIONS = 50000
 N_SAMPLES = 3
 

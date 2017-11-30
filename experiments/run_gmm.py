@@ -1,5 +1,7 @@
 """
 Run a GMM experiment
+
+Restart the Python session before running another experiment
 """
 import os
 
@@ -8,8 +10,8 @@ import numpy as np
 from neural_clustering import config
 from neural_clustering.model import gmm
 
-K = 20
-ITERATIONS = 10000
+K = 15
+ITERATIONS = 3000
 
 cfg = config.load('server_config.yaml')
 

@@ -46,6 +46,9 @@ def _make_grid_plot_by_axis(fn, data, axis, sharex, sharey, max_cols=None):
     if cols > 1:
         axs = [item for sublist in axs for item in sublist]
 
+    # there may be more axes than groups, remove the ones that won't be used
+    axs = axs[:group_ids]
+
     for i, ax in enumerate(axs):
         indexes = [slice(None) for _ in range(data.ndim)]
         indexes[axis] = i
