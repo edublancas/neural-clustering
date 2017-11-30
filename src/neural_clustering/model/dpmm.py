@@ -57,16 +57,16 @@ def fit(x_train, truncation_level, cfg, inference_alg=ed.KLqp,
     inference = inference_alg({mu: qmu, z: qz, beta: qbeta},
                               data={x: x_train})
 
-    if inference_params:
-        inference.initialize(**inference_params)
-    else:
-        inference.initialize()
+    inference.initialize()
 
     sess = ed.get_session()
     init = tf.global_variables_initializer()
     init.run()
 
-    inference.run(**inference_params)
+    if inference_params:
+        inference.run(**inference_params)
+    else:
+        inference.run()
 
     # Save results
     saver = tf.train.Saver()

@@ -25,6 +25,8 @@ and with Gibbs I get this error:
 NotImplementedError: conjugate_log_prob not implemented for
 <class 'abc.Mixture'>
 
+Also, there seems to be an error in Edward, when truncation level > 5
+
 References:
 https://gist.github.com/dustinvtran/d8cc112636b219776621444324919928
 http://edwardlib.org/tutorials/unsupervised
@@ -132,6 +134,7 @@ qz = Categorical(tf.nn.softmax(tf.Variable(tf.zeros([N, K]))))
 inference = ed.KLqp({mu: qmu}, data={x: x_train})
 
 inference = ed.KLqp({mu: qmu, beta: qbeta}, data={x: x_train})
+
 inference = ed.KLqp({mu: qmu, alpha: qalpha}, data={x: x_train})
 
 inference = ed.KLqp({mu: qmu, z: qz, alpha: qalpha}, data={x: x_train})
