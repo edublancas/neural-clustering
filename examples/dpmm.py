@@ -18,9 +18,9 @@ already been reported in discourse, I managed to have a working truncated DPMM
 with KLqp but inference is bad, more on that here:
 https://discourse.edwardlib.org/t/gaussian-mixture-with-covariance-matrix-via-klqp-method/277/2
 
-Seems like the way to go is to use Gibbs, but as I mention before, Gibbs
-foes not work in the joint model. I also tried the collapsed version
-(using Mixture) but inference is bad, and with Gibbs I get this error:
+Bus as I mention before, Gibbs does not work in the joint model.
+I also tried the collapsed version (using Mixture) but inference is bad,
+and with Gibbs I get this error:
 
 NotImplementedError: conjugate_log_prob not implemented for
 <class 'abc.Mixture'>

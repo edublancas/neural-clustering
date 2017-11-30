@@ -1,5 +1,5 @@
 """
-Run a DPMM experiment
+Run a truncated DPMM experiment
 """
 import os
 
@@ -11,7 +11,7 @@ from neural_clustering.model import dpmm
 TRUNCATION_LEVEL = 20
 ITERATIONS = 50000
 
-cfg = config.load('config.yaml')
+cfg = config.load('server_config.yaml')
 
 path = os.path.join(cfg['root'], 'training.npy')
 
