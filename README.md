@@ -44,7 +44,7 @@ Counting jupyter notebooks length:
 
 ## Step 3: Configuration file
 
-Update `root` in `config.yaml` with an aribitrary folder, this the place where all the output from the pipeline will be stored.
+Update `root` in `config.yaml` to a folder in the computer, put the provided `sessions/` folder inside `root`, this is the folder where the output from the pipeline will be stored.
 
 ## Step 4: YASS setup
 
