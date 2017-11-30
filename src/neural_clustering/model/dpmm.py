@@ -66,7 +66,7 @@ def fit(x_train, truncation_level, cfg, inference_alg=ed.KLqp,
     init = tf.global_variables_initializer()
     init.run()
 
-    inference.run()
+    inference.run(**inference_params)
 
     # Save results
     saver = tf.train.Saver()
