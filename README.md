@@ -71,7 +71,7 @@ run_yass yass_config/local_7ch.yaml config.yaml
 
 ## Step 5: Run notebooks
 
-Once input files are generated, start `jupyter` and take a look at the
+Once input files are generated, start `jupyter notebook` and take a look at the
 files located in  `notebooks/`
 
 Notebooks overview:
@@ -83,11 +83,8 @@ Notebooks overview:
 5. Clustering evaluation - Plots to evaluate the clustering results
 6. Conclusions
 
-```shell
-jupyter notebook
-```
+There is also a `notebooks/experiments/` folder, which contains the output for notebooks 4 and 5 for some experiments.
 
+## Resources
 
-## Project repository template
-
-* https://github.com/akucukelbir/probprog-finalproject
+* [Project template(https://github.com/akucukelbir/probprog-finalproject)
