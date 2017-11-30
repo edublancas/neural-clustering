@@ -28,4 +28,4 @@ rm -rf tmp
 
 # deactivate and remove end
 source deactivate
-conda env remove --name test-project
+conda env remove --name test-project -y

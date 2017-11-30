@@ -11,6 +11,7 @@ Machine Learning with Probabilistic Programming, Columbia University, Fall 2017.
 * yass_config/ - Configuration files for the [YASS](https://github.com/paninski-lab/yass) package
 * config.yaml and server_config.yaml - Project configuration file
 * count - Script for counting the length of the notebooks
+* test - Script to check that everything runs smoothly
 
 ## Step 1: Install requirements
 
@@ -65,7 +66,7 @@ run_yass yass_config/local_7ch.yaml config.yaml
 # where root is the root folder in the config.yaml file
 ```
 
-## Step 5: Run notebooks
+## Step 6: Run notebooks
 
 Once input files are generated, start `jupyter notebook` and take a look at the
 files located in  `notebooks/`
