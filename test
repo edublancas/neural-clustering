@@ -14,6 +14,9 @@ pytest --flake8
 # count length
 ./count
 
+# generate yass output
+run_yass yass_config/demo.yaml config.yaml
+
 # check notebooks run without trouble
 mkdir tmp
 jupyter nbconvert --execute --output-dir=tmp/ notebooks/2-data-loading.ipynb

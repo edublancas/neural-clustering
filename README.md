@@ -45,11 +45,7 @@ Counting jupyter notebooks length:
 
 Update `root` in `config.yaml` with an aribitrary folder, this the place where all the output from the pipeline will be stored.
 
-*If demo data was provided, `root` should point to the demo folder location*
-
 ## Step 4: YASS setup
-
-*Skip step 4 and 5 if provided with YASS demo data and stored sessions*
 
 Get raw data files: `7ch.bin` and `geometry.txt`.
 
@@ -87,4 +83,4 @@ There is also a `notebooks/experiments/` folder, which contains the output for n
 
 ## Resources
 
-* [Project template(https://github.com/akucukelbir/probprog-finalproject)
+* [Project template](https://github.com/akucukelbir/probprog-finalproject)

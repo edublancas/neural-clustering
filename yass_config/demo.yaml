@@ -1,6 +1,6 @@
 # DATA FILES
-# data root folder
-root: /Users/Edu/data/yass
+# data root folder (absolute path)
+root: /Users/Edu/data/yass-7ch
 # binary recording filename
 filename: 7ch.bin
 # channel geometry file name
