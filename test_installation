@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+# create and activate conda env
+conda create --name test-project python=3.6.1 -y
+source activate test-project
+
+# install pkg and reqs
+pip install .
+pip install -r requirements.txt
+
+# check flake 8
+pytest --flake8
+
+# count length
+./count
