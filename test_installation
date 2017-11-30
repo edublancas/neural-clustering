@@ -13,3 +13,12 @@ pytest --flake8
 
 # count length
 ./count
+
+# check notebooks run without trouble
+mkdir tmp
+jupyter nbconvert --execute --output-dir=tmp/ notebooks/2-data-loading.ipynb
+jupyter nbconvert --execute --output-dir=tmp/ notebooks/3-model-fit-and-experiments.ipynb
+jupyter nbconvert --execute --output-dir=tmp/ notebooks/4-1-model-criticism-GMM.ipynb
+jupyter nbconvert --execute --output-dir=tmp/ notebooks/4-2-model-criticism-DPMM.ipynb
+jupyter nbconvert --execute --output-dir=tmp/ notebooks/5-clustering-visualization.ipynb
+rm -rf tmp

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# before running this, make sure you have the output from yass in
+# root/yass and the sample models in root/sessions
+
 echo 'Copying notebooks/ to tmp/'
 mkdir tmp
 cp notebooks/* tmp/

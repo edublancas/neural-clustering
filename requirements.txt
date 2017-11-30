@@ -6,6 +6,7 @@ edward
 pyyaml
 jupyter
 matplotlib
+pandas
 seaborn
 tabulate
 yass-algorithm==0.1.1

@@ -41,19 +41,21 @@ Counting jupyter notebooks length:
 ```
 
 
-## Step 3: YASS setup
-
-*Get data and configure YASS:*
-
-Get `7ch.bin` and `geometry.txt`.
-
-Open `yass_config/demo.yaml` and update `root` with the path where `7ch.bin` and `geometry.txt` are located so YASS can load and process the data.
-
-*Configure neural-clustering pacakge:*
+## Step 3: Configuration file
 
 Update `root` in `config.yaml` with an aribitrary folder, this the place where all the output from the pipeline will be stored.
 
-## Step 4: Run YASS pipeline
+*If demo data was provided, `root` should point to the demo folder location*
+
+## Step 4: YASS setup
+
+*Skip step 4 and 5 if provided with YASS demo data and stored sessions*
+
+Get raw data files: `7ch.bin` and `geometry.txt`.
+
+Open `yass_config/demo.yaml` and update `root` with the path where `7ch.bin` and `geometry.txt` are located so YASS can load and process the data.
+
+## Step 5: Run YASS pipeline
 
 Run YASS to generate the necessary files for the clustering and visualization notebooks.
 
