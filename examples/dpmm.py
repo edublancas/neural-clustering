@@ -18,14 +18,17 @@ already been reported in discourse, I managed to have a working truncated DPMM
 with KLqp but inference is bad, more on that here:
 https://discourse.edwardlib.org/t/gaussian-mixture-with-covariance-matrix-via-klqp-method/277/2
 
-Bus as I mention before, Gibbs does not work in the joint model.
-I also tried the collapsed version (using Mixture) but inference is bad,
-and with Gibbs I get this error:
+I also tried the collapsed version (using Mixture) but inference with KLqp is
+bad (since this is the one that does not throw errors, I left this
+implementation in src/model/dpmm.py. However, Also, there is a bug in Edward,
+fitting sometimes fail when truncation level > 5. Issue already reported here:
+https://discourse.edwardlib.org/t/variational-inference-for-dirichlet-process-mixtures/251/2
+
+Collapsed version with Gibbs throws this error:
 
 NotImplementedError: conjugate_log_prob not implemented for
 <class 'abc.Mixture'>
 
-Also, there seems to be an error in Edward, when truncation level > 5
 
 References:
 https://gist.github.com/dustinvtran/d8cc112636b219776621444324919928

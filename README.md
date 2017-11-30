@@ -5,6 +5,7 @@ Machine Learning with Probabilistic Programming, Columbia University, Fall 2017.
 ## Structure
 
 * examples/ - Some files I used to implement models and learn about Edward
+* examples/dpmm.py - Truncated DPMM implementation in Edward, many issues arised when implementing it, see docstring at the top of the file for details
 * experiments/ - Files I used to experiment with different models and settings
 * notebooks/ - Jupyter notebooks
 * src/ - Source code for the package that implements the utility functions
