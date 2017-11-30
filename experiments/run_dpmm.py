@@ -16,7 +16,7 @@ from neural_clustering import config
 from neural_clustering.model import dpmm
 
 
-TRUNCATION_LEVEL = 10
+TRUNCATION_LEVEL = 5
 ITERATIONS = 50000
 N_SAMPLES = 3
 
