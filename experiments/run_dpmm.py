@@ -8,7 +8,7 @@ import numpy as np
 from neural_clustering import config
 from neural_clustering.model import dpmm
 
-TRUNCATION_LEVEL = 10
+TRUNCATION_LEVEL = 20
 ITERATIONS = 50000
 
 cfg = config.load('config.yaml')
