@@ -10,7 +10,7 @@ Machine Learning with Probabilistic Programming, Columbia University, Fall 2017.
 * `notebooks/` - Jupyter notebooks
 * `src/` - Source code for the package that implements the utility functions
 * `yass_config/` - Configuration files for the [YASS](https://github.com/paninski-lab/yass) package
-* `config.yaml` and server_config.yaml - Project configuration file
+* `config.yaml` - Project configuration file
 * `count` - Script for counting the length of the notebooks
 * `test` - Script to check that everything runs smoothly
 * `export_presentation` - Exports notebooks for presentation
