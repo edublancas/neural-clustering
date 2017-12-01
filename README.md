@@ -51,7 +51,7 @@ Update `root` in `config.yaml` to a folder in the computer, put the provided `se
 
 Get raw data files: `7ch.bin` and `geometry.txt`.
 
-Open `yass_config/demo.yaml` and update `root` with the path where `7ch.bin` and `geometry.txt` are located so YASS can load and process the data.
+Open `yass_config/demo.yaml` and update `root` with the absolute path where `7ch.bin` and `geometry.txt` are located so YASS can load and process the data.
 
 ## Step 5: Run YASS pipeline
 
