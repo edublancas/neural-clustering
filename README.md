@@ -60,7 +60,7 @@ Run YASS to generate the necessary files for the clustering and visualization no
 
 ```shell
 # run yass pipeline to process neural data, this will the entire pipeline
-# since right know, there is no way to just run the detection step, but we
+# since there is no way to just run the detection step, but we
 # will only use the detected spikes for clustering
 run_yass yass_config/demo.yaml config.yaml
 
