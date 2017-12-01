@@ -4,15 +4,16 @@ Machine Learning with Probabilistic Programming, Columbia University, Fall 2017.
 
 ## Structure
 
-* examples/ - Some files I used to implement models and learn about Edward
-* examples/dpmm.py - Truncated DPMM implementation in Edward, many issues arised when implementing it, see docstring at the top of the file for details
-* experiments/ - Files I used to experiment with different models and settings
-* notebooks/ - Jupyter notebooks
-* src/ - Source code for the package that implements the utility functions
-* yass_config/ - Configuration files for the [YASS](https://github.com/paninski-lab/yass) package
-* config.yaml and server_config.yaml - Project configuration file
-* count - Script for counting the length of the notebooks
-* test - Script to check that everything runs smoothly
+* `examples/` - Some files I used to implement models and learn about Edward
+* `examples/dpmm.py` - Truncated DPMM implementation in Edward, many issues arised when implementing it, see docstring at the top of the file for details
+* `experiments/` - Files I used to experiment with different models and settings
+* `notebooks/` - Jupyter notebooks
+* `src/` - Source code for the package that implements the utility functions
+* `yass_config/` - Configuration files for the [YASS](https://github.com/paninski-lab/yass) package
+* `config.yaml` and server_config.yaml - Project configuration file
+* `count` - Script for counting the length of the notebooks
+* `test` - Script to check that everything runs smoothly
+* `export_presentation` - Exports notebooks for presentation
 
 ## Step 1: Install requirements
 
