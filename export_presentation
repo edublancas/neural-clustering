@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Some notebooks have issues when rendered on Github, we export them
+# to HTML to avoid those problems
+jupyter nbconvert --output-dir=notebooks/presentation notebooks/1-intro.ipynb
+jupyter nbconvert --output-dir=notebooks/presentation notebooks/2-data-loading.ipynb
+jupyter nbconvert --output-dir=notebooks/presentation notebooks/3-model-fit-and-experiments.ipynb
+
+
+jupyter nbconvert --output-dir=notebooks/presentation notebooks/experiments/30-Nov-2017@16-53-17-GMM-criticism.ipynb
+jupyter nbconvert --output-dir=notebooks/presentation notebooks/experiments/30-Nov-2017@16-53-17-GMM-clustering-viz.ipynb
+
+mv notebooks/presentation/30-Nov-2017@16-53-17-GMM-criticism.html notebooks/presentation/4-1-GMM-5-criticism.html
+mv notebooks/presentation/30-Nov-2017@16-53-17-GMM-clustering-viz.html notebooks/presentation/4-2-GMM-5-clustering-viz.html
+
+jupyter nbconvert --output-dir=notebooks/presentation notebooks/experiments/30-Nov-2017@16-58-38-GMM-criticism.ipynb
+jupyter nbconvert --output-dir=notebooks/presentation notebooks/experiments/30-Nov-2017@16-58-38-GMM-clustering-viz.ipynb
+
+mv notebooks/presentation/30-Nov-2017@16-58-38-GMM-criticism.html notebooks/presentation/4-3-GMM-10-criticism.html
+mv notebooks/presentation/30-Nov-2017@16-58-38-GMM-clustering-viz.html notebooks/presentation/4-4-GMM-10-clustering-viz.html
+
+jupyter nbconvert --output-dir=notebooks/presentation notebooks/6-conclusions.ipynb
+
+mv notebooks/presentation/6-conclusions.html notebooks/presentation/5-conclusions.html
+
+

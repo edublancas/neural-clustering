@@ -81,7 +81,9 @@ Notebooks overview:
 5. Clustering evaluation - Plots to evaluate the clustering results
 6. Conclusions
 
-There is also a `notebooks/experiments/` folder, which contains the output for notebooks 4 and 5 for some experiments.
+`notebooks/experiments/`  contains the output for notebooks 4 and 5 for some experiments.
+
+`notebooks/presentation/` contains the notebooks that will be used for the presentation.
 
 ## Resources
 
