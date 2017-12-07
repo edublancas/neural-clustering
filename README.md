@@ -18,7 +18,7 @@ Machine Learning with Probabilistic Programming, Columbia University, Fall 2017.
 
 ## Presentation
 
-Files for the presentation are here: [ipynb](notebooks/presentation/all.ipynb) and [html](notebooks/presentation/all.html)
+Files for the presentation are here: [ipynb](notebooks/presentation/all.ipynb) and [html](notebooks/presentation/all.html) ([rendered html here](https://rawgit.com/edublancas/neural-clustering/master/notebooks/presentation/all.html))
 
 ## Step 1: Install requirements
 
