@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# join all notebooks to be used in the presentation
+nbmerge notebooks/1-intro.ipynb \
+notebooks/2-data-loading.ipynb \
+notebooks/3-model-fit-and-experiments.ipynb \
+notebooks/experiments/30-Nov-2017@16-53-17-GMM-criticism.ipynb \
+notebooks/experiments/30-Nov-2017@16-53-17-GMM-clustering-viz.ipynb \
+notebooks/experiments/30-Nov-2017@16-58-38-GMM-criticism.ipynb \
+notebooks/experiments/30-Nov-2017@16-58-38-GMM-clustering-viz.ipynb \
+notebooks/6-conclusions.ipynb > notebooks/presentation/all.ipynb
+
+# export to html
+jupyter nbconvert notebooks/presentation/all.ipynb

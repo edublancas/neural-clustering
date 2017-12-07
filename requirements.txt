@@ -10,7 +10,7 @@ pandas==0.21.0
 seaborn==0.8.1
 tabulate==0.8.2
 yass-algorithm==0.1.1
-
+nbmerge==0.0.4
 
 # testing
 pytest==3.3.0
