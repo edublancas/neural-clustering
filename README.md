@@ -15,6 +15,11 @@ Machine Learning with Probabilistic Programming, Columbia University, Fall 2017.
 * `test` - Script to check that everything runs smoothly
 * `export_presentation` - Exports notebooks for presentation
 
+
+## Presentation
+
+Files for the presentation are here: [ipynb](notebooks/presentation/all.ipynb) and [html](notebooks/presentation/all.html)
+
 ## Step 1: Install requirements
 
 ```shell
